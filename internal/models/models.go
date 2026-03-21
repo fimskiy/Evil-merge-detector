@@ -55,6 +55,7 @@ type EvilChange struct {
 	ChangeType ChangeType `json:"change_type"`
 	Severity   Severity   `json:"severity"`
 	Detail     string     `json:"detail"`
+	Diff       string     `json:"diff,omitempty"` // populated only with --commit flag
 }
 
 // MergeReport represents analysis results for a single merge commit.

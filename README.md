@@ -56,6 +56,9 @@ evilmerge scan --format=json
 
 # Exit with code 1 if any warnings found (for CI)
 evilmerge scan --fail-on=warning
+
+# Detailed inspection of a specific merge commit (with line diffs)
+evilmerge scan --commit=a1b2c3d
 ```
 
 **Example output:**
@@ -121,6 +124,7 @@ Findings will appear in **Security → Code scanning alerts** with severity, aff
 | `--limit` | Max merge commits to analyze | unlimited |
 | `--format` | Output format: `text`, `json`, `sarif` | `text` |
 | `--fail-on` | Exit code 1 if findings at or above severity | — |
+| `--commit` | Detailed inspection of a specific merge commit (hash) | — |
 
 ## How it works
 

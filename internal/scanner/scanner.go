@@ -14,6 +14,27 @@ import (
 
 var errLimitReached = errors.New("limit reached")
 
+// InspectCommit performs a detailed analysis of a single merge commit by hash.
+// It populates EvilChange.Diff for each finding.
+func (s *Scanner) InspectCommit(repoPath, hash string) (*models.MergeReport, error) {
+	if repoPath == "" {
+		repoPath = "."
+	}
+
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return nil, fmt.Errorf("opening repository at %s: %w", repoPath, err)
+	}
+
+	h := plumbing.NewHash(hash)
+	commit, err := repo.CommitObject(h)
+	if err != nil {
+		return nil, fmt.Errorf("commit %s not found: %w", hash, err)
+	}
+
+	return s.detector.AnalyzeMergeDetailed(commit)
+}
+
 // Scanner orchestrates repository scanning.
 type Scanner struct {
 	detector *detector.Detector

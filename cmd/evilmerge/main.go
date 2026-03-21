@@ -32,6 +32,7 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 		scanSeverity string
 		scanLimit    int
 		scanFailOn   string
+		scanCommit   string
 	)
 
 	var scanCmd = &cobra.Command{
@@ -40,15 +41,34 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 		Long:  `Scan analyzes merge commits in the repository and reports any that contain unexpected changes.`,
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opts := models.ScanOptions{}
-
+			repoPath := ""
 			if len(args) > 0 {
-				opts.RepoPath = args[0]
+				repoPath = args[0]
 			}
 
-			opts.Branch = scanBranch
-			opts.Limit = scanLimit
-			opts.MinSeverity = parseSeverity(scanSeverity)
+			// Print header
+			if _, err := fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version); err != nil {
+				return err
+			}
+
+			s := scanner.New()
+
+			// --commit mode: detailed single-commit inspection
+			if scanCommit != "" {
+				report, err := s.InspectCommit(repoPath, scanCommit)
+				if err != nil {
+					return err
+				}
+				return reporter.PrintDetail(os.Stdout, report)
+			}
+
+			// Normal scan mode
+			opts := models.ScanOptions{
+				RepoPath:    repoPath,
+				Branch:      scanBranch,
+				Limit:       scanLimit,
+				MinSeverity: parseSeverity(scanSeverity),
+			}
 
 			if scanSince != "" {
 				t, err := time.Parse("2006-01-02", scanSince)
@@ -68,11 +88,6 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 
 			failOnSeverity := parseSeverity(scanFailOn)
 
-			// Print header
-			_, _ = fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version)
-
-			// Run scan
-			s := scanner.New()
 			result, err := s.Scan(opts)
 			if err != nil {
 				return err
@@ -113,6 +128,7 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 	scanCmd.Flags().StringVar(&scanSeverity, "severity", "", "Minimum severity to report: info, warning, critical")
 	scanCmd.Flags().IntVar(&scanLimit, "limit", 0, "Maximum number of merge commits to analyze (0 = unlimited)")
 	scanCmd.Flags().StringVar(&scanFailOn, "fail-on", "", "Exit with code 1 if evil merges found at or above this severity")
+	scanCmd.Flags().StringVar(&scanCommit, "commit", "", "Inspect a specific merge commit in detail (by full or short hash)")
 
 	// version command
 	var versionCmd = &cobra.Command{

@@ -6,6 +6,7 @@ import (
 
 	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 // sensitivePatterns are file path patterns that elevate severity to CRITICAL.
@@ -22,11 +23,23 @@ func New() *Detector {
 	return &Detector{}
 }
 
-// AnalyzeMerge checks a merge commit for evil changes by comparing its tree
-// against the merge-base and both parents.
-func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport, error) {
+// commitTrees holds the four trees needed for evil merge analysis.
+type commitTrees struct {
+	merge *object.Tree
+	p1    *object.Tree
+	p2    *object.Tree
+	base  *object.Tree
+	// hashes for display
+	p1Hash   string
+	p2Hash   string
+	baseHash string
+}
+
+// extractTrees resolves all trees from a merge commit.
+func extractTrees(mergeCommit *object.Commit) (*commitTrees, error) {
 	if mergeCommit.NumParents() != 2 {
-		return nil, fmt.Errorf("commit %s has %d parents (only 2-parent merges supported)", mergeCommit.Hash.String(), mergeCommit.NumParents())
+		return nil, fmt.Errorf("commit %s has %d parents (only 2-parent merges supported)",
+			mergeCommit.Hash.String(), mergeCommit.NumParents())
 	}
 
 	parent1, err := mergeCommit.Parent(0)
@@ -39,13 +52,11 @@ func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport
 		return nil, fmt.Errorf("getting parent 2: %w", err)
 	}
 
-	// Get merge-base(s)
 	bases, err := parent1.MergeBase(parent2)
 	if err != nil {
 		return nil, fmt.Errorf("finding merge-base: %w", err)
 	}
 
-	// Get trees
 	mergeTree, err := mergeCommit.Tree()
 	if err != nil {
 		return nil, fmt.Errorf("getting merge tree: %w", err)
@@ -61,21 +72,59 @@ func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport
 		return nil, fmt.Errorf("getting parent2 tree: %w", err)
 	}
 
-	var baseTree *object.Tree
+	ct := &commitTrees{
+		merge:  mergeTree,
+		p1:     p1Tree,
+		p2:     p2Tree,
+		p1Hash: parent1.Hash.String()[:7],
+		p2Hash: parent2.Hash.String()[:7],
+	}
+
 	if len(bases) > 0 {
-		baseTree, err = bases[0].Tree()
+		ct.base, err = bases[0].Tree()
 		if err != nil {
 			return nil, fmt.Errorf("getting base tree: %w", err)
 		}
+		ct.baseHash = bases[0].Hash.String()[:7]
 	}
 
-	// Find evil changes
-	evilChanges, err := d.findEvilChanges(mergeTree, p1Tree, p2Tree, baseTree)
+	return ct, nil
+}
+
+// AnalyzeMerge checks a merge commit for evil changes.
+func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport, error) {
+	ct, err := extractTrees(mergeCommit)
+	if err != nil {
+		return nil, err
+	}
+	return d.buildReport(mergeCommit, ct, false)
+}
+
+// AnalyzeMergeDetailed is like AnalyzeMerge but also populates EvilChange.Diff
+// for each finding. Used by the --commit flag for detailed inspection.
+func (d *Detector) AnalyzeMergeDetailed(mergeCommit *object.Commit) (*models.MergeReport, error) {
+	ct, err := extractTrees(mergeCommit)
+	if err != nil {
+		return nil, err
+	}
+	return d.buildReport(mergeCommit, ct, true)
+}
+
+func (d *Detector) buildReport(mergeCommit *object.Commit, ct *commitTrees, withDiff bool) (*models.MergeReport, error) {
+	parent1, err := mergeCommit.Parent(0)
+	if err != nil {
+		return nil, fmt.Errorf("getting parent 1: %w", err)
+	}
+	parent2, err := mergeCommit.Parent(1)
+	if err != nil {
+		return nil, fmt.Errorf("getting parent 2: %w", err)
+	}
+
+	evilChanges, err := d.findEvilChanges(ct, withDiff)
 	if err != nil {
 		return nil, fmt.Errorf("finding evil changes: %w", err)
 	}
 
-	// Build report
 	report := &models.MergeReport{
 		CommitHash:   mergeCommit.Hash.String(),
 		ShortHash:    mergeCommit.Hash.String()[:7],
@@ -87,7 +136,6 @@ func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport
 		EvilChanges:  evilChanges,
 	}
 
-	// Compute max severity
 	for _, ec := range evilChanges {
 		if ec.Severity > report.MaxSeverity {
 			report.MaxSeverity = ec.Severity
@@ -97,116 +145,136 @@ func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport
 	return report, nil
 }
 
-// findEvilChanges compares the merge tree against parents and base to find
-// changes that don't belong to either parent branch.
-func (d *Detector) findEvilChanges(mergeTree, p1Tree, p2Tree, baseTree *object.Tree) ([]models.EvilChange, error) {
+// findEvilChanges compares the merge tree against parents and base.
+func (d *Detector) findEvilChanges(ct *commitTrees, withDiff bool) ([]models.EvilChange, error) {
 	var changes []models.EvilChange
 
-	// Collect all file paths from merge tree
-	mergeFiles := make(map[string]string) // path -> hash
-	if err := mergeTree.Files().ForEach(func(f *object.File) error {
+	mergeFiles := make(map[string]string)
+	if err := ct.merge.Files().ForEach(func(f *object.File) error {
 		mergeFiles[f.Name] = f.Hash.String()
 		return nil
 	}); err != nil {
 		return nil, fmt.Errorf("iterating merge tree: %w", err)
 	}
 
-	// Collect file hashes from parents and base
-	p1Files, err := treeFileHashes(p1Tree)
+	p1Files, err := treeFileHashes(ct.p1)
 	if err != nil {
 		return nil, fmt.Errorf("iterating parent1 tree: %w", err)
 	}
-	p2Files, err := treeFileHashes(p2Tree)
+	p2Files, err := treeFileHashes(ct.p2)
 	if err != nil {
 		return nil, fmt.Errorf("iterating parent2 tree: %w", err)
 	}
-
-	baseFiles, err := treeFileHashes(baseTree)
+	baseFiles, err := treeFileHashes(ct.base)
 	if err != nil {
 		return nil, fmt.Errorf("iterating base tree: %w", err)
 	}
 
-	// Check each file in the merge commit
 	for path, mergeHash := range mergeFiles {
 		p1Hash, inP1 := p1Files[path]
 		p2Hash, inP2 := p2Files[path]
 		baseHash, inBase := baseFiles[path]
 
-		// File exists in merge but not in any parent or base → new file added in merge
 		if !inP1 && !inP2 && !inBase {
-			changes = append(changes, models.EvilChange{
+			ec := models.EvilChange{
 				FilePath:   path,
 				ChangeType: models.ChangeAdded,
 				Severity:   d.classifySeverity(path, true),
 				Detail:     "File added only in merge commit, not present in any parent or base",
-			})
+			}
+			if withDiff {
+				content, _ := fileContent(ct.merge, path)
+				ec.Diff = formatAddedFile(content, ct.merge.Hash.String()[:7])
+			}
+			changes = append(changes, ec)
 			continue
 		}
 
-		// File matches at least one parent → no evil change for this file
 		if mergeHash == p1Hash || mergeHash == p2Hash {
 			continue
 		}
 
-		// File unchanged across both branches (base == p1 == p2) but different in merge
 		if inBase && baseHash == p1Hash && baseHash == p2Hash && mergeHash != baseHash {
-			changes = append(changes, models.EvilChange{
+			ec := models.EvilChange{
 				FilePath:   path,
 				ChangeType: models.ChangeModified,
 				Severity:   models.SeverityCritical,
 				Detail:     "File unchanged in both branches but modified in merge commit",
-			})
+			}
+			if withDiff {
+				old, _ := fileContent(ct.p1, path)
+				new, _ := fileContent(ct.merge, path)
+				ec.Diff = computeDiff(old, new, "P1 "+ct.p1Hash, "M  "+ct.merge.Hash.String()[:7])
+			}
+			changes = append(changes, ec)
 			continue
 		}
 
-		// File changed in only one branch, but merge doesn't match either parent
 		changedInP1 := !inBase || baseHash != p1Hash
 		changedInP2 := !inBase || baseHash != p2Hash
 
 		if changedInP1 && !changedInP2 {
-			// Changed only in P1 branch, merge should match P1
-			changes = append(changes, models.EvilChange{
+			ec := models.EvilChange{
 				FilePath:   path,
 				ChangeType: models.ChangeModified,
 				Severity:   d.classifySeverity(path, false),
 				Detail:     "File changed only in first parent branch, but merge result differs from both parents",
-			})
+			}
+			if withDiff {
+				old, _ := fileContent(ct.p1, path)
+				new, _ := fileContent(ct.merge, path)
+				ec.Diff = computeDiff(old, new, "P1 "+ct.p1Hash, "M  "+ct.merge.Hash.String()[:7])
+			}
+			changes = append(changes, ec)
 			continue
 		}
 
 		if !changedInP1 && changedInP2 {
-			// Changed only in P2 branch, merge should match P2
-			changes = append(changes, models.EvilChange{
+			ec := models.EvilChange{
 				FilePath:   path,
 				ChangeType: models.ChangeModified,
 				Severity:   d.classifySeverity(path, false),
 				Detail:     "File changed only in second parent branch, but merge result differs from both parents",
-			})
+			}
+			if withDiff {
+				old, _ := fileContent(ct.p2, path)
+				new, _ := fileContent(ct.merge, path)
+				ec.Diff = computeDiff(old, new, "P2 "+ct.p2Hash, "M  "+ct.merge.Hash.String()[:7])
+			}
+			changes = append(changes, ec)
 			continue
 		}
 
-		// File changed in both branches (conflict zone) and merge differs from both
 		if changedInP1 && changedInP2 {
-			changes = append(changes, models.EvilChange{
+			ec := models.EvilChange{
 				FilePath:   path,
 				ChangeType: models.ChangeModified,
 				Severity:   models.SeverityInfo,
 				Detail:     "File changed in both branches (potential conflict resolution), merge differs from both parents",
-			})
+			}
+			if withDiff {
+				old, _ := fileContent(ct.p1, path)
+				new, _ := fileContent(ct.merge, path)
+				ec.Diff = computeDiff(old, new, "P1 "+ct.p1Hash, "M  "+ct.merge.Hash.String()[:7])
+			}
+			changes = append(changes, ec)
 		}
 	}
 
-	// Check for files deleted only in the merge (present in both parents but absent in merge)
 	for path := range p1Files {
 		if _, inMerge := mergeFiles[path]; !inMerge {
 			if _, inP2 := p2Files[path]; inP2 {
-				// File exists in both parents but was deleted in merge
-				changes = append(changes, models.EvilChange{
+				ec := models.EvilChange{
 					FilePath:   path,
 					ChangeType: models.ChangeDeleted,
 					Severity:   d.classifySeverity(path, false),
 					Detail:     "File present in both parents but deleted in merge commit",
-				})
+				}
+				if withDiff {
+					content, _ := fileContent(ct.p1, path)
+					ec.Diff = formatDeletedFile(content, ct.p1Hash)
+				}
+				changes = append(changes, ec)
 			}
 		}
 	}
@@ -214,7 +282,6 @@ func (d *Detector) findEvilChanges(mergeTree, p1Tree, p2Tree, baseTree *object.T
 	return changes, nil
 }
 
-// classifySeverity determines severity based on file path patterns.
 func (d *Detector) classifySeverity(path string, isNew bool) models.Severity {
 	lower := strings.ToLower(path)
 	for _, pattern := range sensitivePatterns {
@@ -239,4 +306,86 @@ func treeFileHashes(tree *object.Tree) (map[string]string, error) {
 		return nil
 	})
 	return files, err
+}
+
+// fileContent returns the text content of a file in the given tree.
+// Returns empty string if the file doesn't exist or can't be read.
+func fileContent(tree *object.Tree, path string) (string, error) {
+	if tree == nil {
+		return "", nil
+	}
+	f, err := tree.File(path)
+	if err != nil {
+		return "", nil //nolint:nilerr // file absent in this tree is not an error
+	}
+	return f.Contents()
+}
+
+// computeDiff returns a unified-style diff between oldContent and newContent.
+func computeDiff(oldContent, newContent, oldLabel, newLabel string) string {
+	dmp := diffmatchpatch.New()
+	a, b, c := dmp.DiffLinesToChars(oldContent, newContent)
+	diffs := dmp.DiffMain(a, b, false)
+	diffs = dmp.DiffCharsToLines(diffs, c)
+
+	const maxContext = 3
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "--- %s\n", oldLabel)
+	fmt.Fprintf(&sb, "+++ %s\n", newLabel)
+
+	for _, d := range diffs {
+		lines := strings.Split(strings.TrimSuffix(d.Text, "\n"), "\n")
+		switch d.Type {
+		case diffmatchpatch.DiffDelete:
+			for _, l := range lines {
+				fmt.Fprintf(&sb, "- %s\n", l)
+			}
+		case diffmatchpatch.DiffInsert:
+			for _, l := range lines {
+				fmt.Fprintf(&sb, "+ %s\n", l)
+			}
+		case diffmatchpatch.DiffEqual:
+			// Show up to maxContext lines; collapse the rest
+			if len(lines) > maxContext*2 {
+				for _, l := range lines[:maxContext] {
+					fmt.Fprintf(&sb, "  %s\n", l)
+				}
+				fmt.Fprintf(&sb, "  ... (%d unchanged lines)\n", len(lines)-maxContext*2)
+				for _, l := range lines[len(lines)-maxContext:] {
+					fmt.Fprintf(&sb, "  %s\n", l)
+				}
+			} else {
+				for _, l := range lines {
+					fmt.Fprintf(&sb, "  %s\n", l)
+				}
+			}
+		}
+	}
+
+	return sb.String()
+}
+
+// formatAddedFile shows a new file added only in the merge commit.
+func formatAddedFile(content, mergeHash string) string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "--- /dev/null\n")
+	fmt.Fprintf(&sb, "+++ M  %s (new file)\n", mergeHash)
+	lines := strings.Split(strings.TrimSuffix(content, "\n"), "\n")
+	for _, l := range lines {
+		fmt.Fprintf(&sb, "+ %s\n", l)
+	}
+	return sb.String()
+}
+
+// formatDeletedFile shows a file deleted only in the merge commit.
+func formatDeletedFile(content, p1Hash string) string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "--- P1 %s\n", p1Hash)
+	fmt.Fprintf(&sb, "+++ /dev/null (deleted in merge)\n")
+	lines := strings.Split(strings.TrimSuffix(content, "\n"), "\n")
+	for _, l := range lines {
+		fmt.Fprintf(&sb, "- %s\n", l)
+	}
+	return sb.String()
 }
