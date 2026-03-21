@@ -69,7 +69,7 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 			failOnSeverity := parseSeverity(scanFailOn)
 
 			// Print header
-			fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version)
+			_, _ = fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version)
 
 			// Run scan
 			s := scanner.New()
