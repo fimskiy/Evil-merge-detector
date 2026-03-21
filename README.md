@@ -92,6 +92,24 @@ Add to your GitHub Actions workflow:
     evilmerge scan --branch=main --fail-on=warning
 ```
 
+## GitHub Code Scanning (SARIF)
+
+Upload results to GitHub's Security tab using the SARIF format:
+
+```yaml
+- name: Scan for evil merges
+  run: |
+    go install github.com/fimskiy/evil-merge-detector/cmd/evilmerge@latest
+    evilmerge scan --format=sarif > results.sarif
+
+- name: Upload to GitHub Code Scanning
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: results.sarif
+```
+
+Findings will appear in **Security → Code scanning alerts** with severity, affected file, and commit fingerprint.
+
 ## Flags
 
 | Flag | Description | Default |
@@ -101,7 +119,7 @@ Add to your GitHub Actions workflow:
 | `--until` | Scan commits before date (YYYY-MM-DD) | — |
 | `--severity` | Minimum severity: `info`, `warning`, `critical` | `info` |
 | `--limit` | Max merge commits to analyze | unlimited |
-| `--format` | Output format: `text`, `json` | `text` |
+| `--format` | Output format: `text`, `json`, `sarif` | `text` |
 | `--fail-on` | Exit code 1 if findings at or above severity | — |
 
 ## How it works

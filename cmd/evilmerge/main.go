@@ -83,6 +83,8 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 			switch scanFormat {
 			case "json":
 				rep = reporter.NewJSON(true)
+			case "sarif":
+				rep = reporter.NewSARIF(version)
 			default:
 				rep = reporter.NewText()
 			}
@@ -107,7 +109,7 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 	scanCmd.Flags().StringVar(&scanBranch, "branch", "", "Branch to scan (default: current HEAD)")
 	scanCmd.Flags().StringVar(&scanSince, "since", "", "Scan commits after this date (YYYY-MM-DD)")
 	scanCmd.Flags().StringVar(&scanUntil, "until", "", "Scan commits before this date (YYYY-MM-DD)")
-	scanCmd.Flags().StringVar(&scanFormat, "format", "text", "Output format: text, json")
+	scanCmd.Flags().StringVar(&scanFormat, "format", "text", "Output format: text, json, sarif")
 	scanCmd.Flags().StringVar(&scanSeverity, "severity", "", "Minimum severity to report: info, warning, critical")
 	scanCmd.Flags().IntVar(&scanLimit, "limit", 0, "Maximum number of merge commits to analyze (0 = unlimited)")
 	scanCmd.Flags().StringVar(&scanFailOn, "fail-on", "", "Exit with code 1 if evil merges found at or above this severity")
