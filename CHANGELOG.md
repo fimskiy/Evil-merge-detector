@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JSON output for CI/CD integration
 - SARIF 2.1.0 output (`--format=sarif`) for GitHub Code Scanning integration
 - `--commit` flag for detailed single-commit inspection with line-level diffs
+- `context.Context` propagation throughout scanner and detector with `--timeout` flag and Ctrl+C cancellation support
 - Filtering by date (`--since`, `--until`), branch (`--branch`), severity (`--severity`)
 - Commit limit (`--limit`) for large repositories
 - `--fail-on` flag for CI pipelines (exit code 1 on findings)

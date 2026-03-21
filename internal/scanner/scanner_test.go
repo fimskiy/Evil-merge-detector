@@ -1,6 +1,7 @@
 package scanner_test
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -65,7 +66,7 @@ func TestScanner_Scan(t *testing.T) {
 	dir := setupTestRepo(t)
 
 	s := scanner.New()
-	result, err := s.Scan(models.ScanOptions{
+	result, err := s.Scan(context.Background(), models.ScanOptions{
 		RepoPath: dir,
 	})
 	if err != nil {
@@ -85,7 +86,7 @@ func TestScanner_ScanWithLimit(t *testing.T) {
 	dir := setupTestRepo(t)
 
 	s := scanner.New()
-	result, err := s.Scan(models.ScanOptions{
+	result, err := s.Scan(context.Background(), models.ScanOptions{
 		RepoPath: dir,
 		Limit:    1,
 	})
@@ -105,7 +106,7 @@ func TestScanner_ScanWithSeverityFilter(t *testing.T) {
 	dir := setupTestRepo(t)
 
 	s := scanner.New()
-	result, err := s.Scan(models.ScanOptions{
+	result, err := s.Scan(context.Background(), models.ScanOptions{
 		RepoPath:    dir,
 		MinSeverity: models.SeverityCritical,
 	})

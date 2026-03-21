@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -14,9 +15,21 @@ import (
 
 var errLimitReached = errors.New("limit reached")
 
+// Scanner orchestrates repository scanning.
+type Scanner struct {
+	detector *detector.Detector
+}
+
+// New creates a new Scanner.
+func New() *Scanner {
+	return &Scanner{
+		detector: detector.New(),
+	}
+}
+
 // InspectCommit performs a detailed analysis of a single merge commit by hash.
 // It populates EvilChange.Diff for each finding.
-func (s *Scanner) InspectCommit(repoPath, hash string) (*models.MergeReport, error) {
+func (s *Scanner) InspectCommit(ctx context.Context, repoPath, hash string) (*models.MergeReport, error) {
 	if repoPath == "" {
 		repoPath = "."
 	}
@@ -32,23 +45,11 @@ func (s *Scanner) InspectCommit(repoPath, hash string) (*models.MergeReport, err
 		return nil, fmt.Errorf("commit %s not found: %w", hash, err)
 	}
 
-	return s.detector.AnalyzeMergeDetailed(commit)
-}
-
-// Scanner orchestrates repository scanning.
-type Scanner struct {
-	detector *detector.Detector
-}
-
-// New creates a new Scanner.
-func New() *Scanner {
-	return &Scanner{
-		detector: detector.New(),
-	}
+	return s.detector.AnalyzeMergeDetailed(ctx, commit)
 }
 
 // Scan analyzes a repository for evil merges according to the given options.
-func (s *Scanner) Scan(opts models.ScanOptions) (*models.ScanResult, error) {
+func (s *Scanner) Scan(ctx context.Context, opts models.ScanOptions) (*models.ScanResult, error) {
 	start := time.Now()
 
 	repoPath := opts.RepoPath
@@ -65,7 +66,6 @@ func (s *Scanner) Scan(opts models.ScanOptions) (*models.ScanResult, error) {
 		Order: git.LogOrderCommitterTime,
 	}
 
-	// If branch specified, resolve its HEAD
 	if opts.Branch != "" {
 		ref, err := repo.Reference(plumbing.NewBranchReferenceName(opts.Branch), true)
 		if err != nil {
@@ -93,7 +93,11 @@ func (s *Scanner) Scan(opts models.ScanOptions) (*models.ScanResult, error) {
 
 	count := 0
 	err = commitIter.ForEach(func(c *object.Commit) error {
-		// Only analyze merge commits (exactly 2 parents)
+		// Respect context cancellation (Ctrl+C or timeout)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		if c.NumParents() != 2 {
 			return nil
 		}
@@ -106,15 +110,16 @@ func (s *Scanner) Scan(opts models.ScanOptions) (*models.ScanResult, error) {
 
 		count++
 
-		report, err := s.detector.AnalyzeMerge(c)
+		report, err := s.detector.AnalyzeMerge(ctx, c)
 		if err != nil {
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+				return err
+			}
 			// Skip problematic merges (e.g., shallow clones)
 			return nil
 		}
 
-		// Filter by minimum severity
 		if len(report.EvilChanges) > 0 && report.MaxSeverity >= opts.MinSeverity {
-			// Filter individual changes by severity
 			var filtered []models.EvilChange
 			for _, ec := range report.EvilChanges {
 				if ec.Severity >= opts.MinSeverity {

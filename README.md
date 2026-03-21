@@ -59,6 +59,9 @@ evilmerge scan --fail-on=warning
 
 # Detailed inspection of a specific merge commit (with line diffs)
 evilmerge scan --commit=a1b2c3d
+
+# Limit scan to 60 seconds (useful for very large repositories)
+evilmerge scan --timeout=60s
 ```
 
 **Example output:**
@@ -125,6 +128,7 @@ Findings will appear in **Security → Code scanning alerts** with severity, aff
 | `--format` | Output format: `text`, `json`, `sarif` | `text` |
 | `--fail-on` | Exit code 1 if findings at or above severity | — |
 | `--commit` | Detailed inspection of a specific merge commit (hash) | — |
+| `--timeout` | Maximum scan duration, e.g. `30s`, `5m` | unlimited |
 
 ## How it works
 

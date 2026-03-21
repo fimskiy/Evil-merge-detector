@@ -1,6 +1,7 @@
 package detector_test
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -118,7 +119,7 @@ func TestDetector_CleanMerge(t *testing.T) {
 	if cleanMerge == nil {
 		t.Fatal("clean merge not found")
 	}
-	report, err := d.AnalyzeMerge(cleanMerge)
+	report, err := d.AnalyzeMerge(context.Background(), cleanMerge)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +131,7 @@ func TestDetector_CleanMerge(t *testing.T) {
 	if evilMerge == nil {
 		t.Fatal("evil merge not found")
 	}
-	report, err = d.AnalyzeMerge(evilMerge)
+	report, err = d.AnalyzeMerge(context.Background(), evilMerge)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +179,7 @@ func TestDetector_NonMergeCommit(t *testing.T) {
 	}
 
 	d := detector.New()
-	_, err = d.AnalyzeMerge(nonMerge)
+	_, err = d.AnalyzeMerge(context.Background(), nonMerge)
 	if err == nil {
 		t.Error("should return error for non-merge commit")
 	}

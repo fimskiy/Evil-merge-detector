@@ -1,6 +1,7 @@
 package detector
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -92,7 +93,10 @@ func extractTrees(mergeCommit *object.Commit) (*commitTrees, error) {
 }
 
 // AnalyzeMerge checks a merge commit for evil changes.
-func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport, error) {
+func (d *Detector) AnalyzeMerge(ctx context.Context, mergeCommit *object.Commit) (*models.MergeReport, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	ct, err := extractTrees(mergeCommit)
 	if err != nil {
 		return nil, err
@@ -102,7 +106,10 @@ func (d *Detector) AnalyzeMerge(mergeCommit *object.Commit) (*models.MergeReport
 
 // AnalyzeMergeDetailed is like AnalyzeMerge but also populates EvilChange.Diff
 // for each finding. Used by the --commit flag for detailed inspection.
-func (d *Detector) AnalyzeMergeDetailed(mergeCommit *object.Commit) (*models.MergeReport, error) {
+func (d *Detector) AnalyzeMergeDetailed(ctx context.Context, mergeCommit *object.Commit) (*models.MergeReport, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	ct, err := extractTrees(mergeCommit)
 	if err != nil {
 		return nil, err
