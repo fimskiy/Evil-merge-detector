@@ -99,7 +99,7 @@ func TestDetector_CleanMerge(t *testing.T) {
 	var cleanMerge *object.Commit
 	var evilMerge *object.Commit
 
-	iter.ForEach(func(c *object.Commit) error {
+	if err := iter.ForEach(func(c *object.Commit) error {
 		if c.NumParents() >= 2 {
 			if evilMerge == nil {
 				evilMerge = c // Most recent merge (evil)
@@ -108,7 +108,9 @@ func TestDetector_CleanMerge(t *testing.T) {
 			}
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	d := detector.New()
 
@@ -166,12 +168,14 @@ func TestDetector_NonMergeCommit(t *testing.T) {
 
 	// Find a non-merge commit
 	var nonMerge *object.Commit
-	iter.ForEach(func(c *object.Commit) error {
+	if err := iter.ForEach(func(c *object.Commit) error {
 		if c.NumParents() == 1 && nonMerge == nil {
 			nonMerge = c
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	d := detector.New()
 	_, err = d.AnalyzeMerge(nonMerge)

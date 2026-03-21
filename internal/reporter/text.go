@@ -18,25 +18,39 @@ func NewText() *TextReporter {
 }
 
 func (r *TextReporter) Report(w io.Writer, result *models.ScanResult) error {
-	fmt.Fprintf(w, "Scanning repository: %s", result.RepoPath)
-	if result.Branch != "" {
-		fmt.Fprintf(w, " (branch: %s)", result.Branch)
+	if _, err := fmt.Fprintf(w, "Scanning repository: %s", result.RepoPath); err != nil {
+		return err
 	}
-	fmt.Fprintln(w)
+	if result.Branch != "" {
+		if _, err := fmt.Fprintf(w, " (branch: %s)", result.Branch); err != nil {
+			return err
+		}
+	}
+	if _, err := fmt.Fprintln(w); err != nil {
+		return err
+	}
 
-	fmt.Fprintf(w, "Analyzed %d merge commits, found %d evil merges (in %s)\n\n",
-		result.TotalMerges, result.EvilMerges, result.ScanDuration.Round(1e6))
+	if _, err := fmt.Fprintf(w, "Analyzed %d merge commits, found %d evil merges (in %s)\n\n",
+		result.TotalMerges, result.EvilMerges, result.ScanDuration.Round(1e6)); err != nil {
+		return err
+	}
 
 	if len(result.Reports) == 0 {
 		green := color.New(color.FgGreen).SprintFunc()
-		fmt.Fprintln(w, green("No evil merges detected!"))
+		if _, err := fmt.Fprintln(w, green("No evil merges detected!")); err != nil {
+			return err
+		}
 		return nil
 	}
 
 	// Print table header
 	header := fmt.Sprintf("%-10s  %-50s  %-25s  %s", "SEVERITY", "COMMIT", "AUTHOR", "FILES")
-	fmt.Fprintln(w, header)
-	fmt.Fprintln(w, strings.Repeat("-", len(header)+10))
+	if _, err := fmt.Fprintln(w, header); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w, strings.Repeat("-", len(header)+10)); err != nil {
+		return err
+	}
 
 	for _, report := range result.Reports {
 		// Truncate message to first line, max 40 chars
@@ -67,10 +81,14 @@ func (r *TextReporter) Report(w io.Writer, result *models.ScanResult) error {
 
 		sevStr := colorSeverity(report.MaxSeverity)
 
-		fmt.Fprintf(w, "%-10s  %-50s  %-25s  %s\n", sevStr, commitInfo, author, fileStr)
+		if _, err := fmt.Fprintf(w, "%-10s  %-50s  %-25s  %s\n", sevStr, commitInfo, author, fileStr); err != nil {
+			return err
+		}
 	}
 
-	fmt.Fprintf(w, "\nRe-run with --format=json for full details on each merge.\n")
+	if _, err := fmt.Fprintf(w, "\nRe-run with --format=json for full details on each merge.\n"); err != nil {
+		return err
+	}
 	return nil
 }
 
