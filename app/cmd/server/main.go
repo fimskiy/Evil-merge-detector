@@ -8,6 +8,7 @@ import (
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/config"
 	"github.com/fimskiy/evil-merge-detector/app/internal/dashboard"
+	"github.com/fimskiy/evil-merge-detector/app/internal/landing"
 	"github.com/fimskiy/evil-merge-detector/app/internal/oauth"
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 	"github.com/fimskiy/evil-merge-detector/app/internal/webhook"
@@ -50,7 +51,7 @@ func main() {
 	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			http.Redirect(w, r, "/dashboard", http.StatusFound)
+			landing.Handler(w, r)
 			return
 		}
 		http.NotFound(w, r)
