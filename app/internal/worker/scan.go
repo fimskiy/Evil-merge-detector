@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-github/v84/github"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
+	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/fimskiy/evil-merge-detector/internal/scanner"
 )
@@ -19,9 +20,11 @@ type PRJob struct {
 	CloneURL       string
 	HeadSHA        string
 	HeadRef        string
+	PRNumber       int
 	InstallationID int64
 	AppID          int64
 	PrivateKey     []byte
+	DB             *store.Store
 }
 
 func ScanPR(job PRJob) {
@@ -53,6 +56,22 @@ func ScanPR(job PRJob) {
 	if err := ghclient.UpdateCheckRun(ctx, client, job.Owner, job.Repo, runID, result); err != nil {
 		log.Printf("error updating check run for %s/%s: %v", job.Owner, job.Repo, err)
 	}
+
+	if job.DB != nil {
+		rec := store.ScanRecord{
+			InstallationID: job.InstallationID,
+			Owner:          job.Owner,
+			Repo:           job.Repo,
+			PRNumber:       job.PRNumber,
+			HeadSHA:        job.HeadSHA,
+			EvilMerges:     result.EvilMerges,
+			TotalMerges:    result.TotalMerges,
+			DurationMs:     result.ScanDuration.Milliseconds(),
+		}
+		if err := job.DB.SaveScan(ctx, rec); err != nil {
+			log.Printf("saving scan record for %s/%s: %v", job.Owner, job.Repo, err)
+		}
+	}
 }
 
 func runScan(ctx context.Context, job PRJob) (*models.ScanResult, error) {
@@ -77,8 +96,6 @@ func runScan(ctx context.Context, job PRJob) (*models.ScanResult, error) {
 	})
 }
 
-// NewGitHubClient is exposed for use in the webhook handler to post immediate
-// "queued" status before handing off to the goroutine.
 func NewGitHubClient(appID, installationID int64, privateKey []byte) (*github.Client, error) {
 	return ghclient.ForInstallation(appID, installationID, privateKey)
 }

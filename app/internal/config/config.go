@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Port           string
-	AppID          int64
-	PrivateKey     []byte
-	WebhookSecret  []byte
+	Port          string
+	AppID         int64
+	PrivateKey    []byte
+	WebhookSecret []byte
+	DatabaseURL   string
 }
 
 func Load() (*Config, error) {
@@ -52,5 +53,6 @@ func Load() (*Config, error) {
 		AppID:         appID,
 		PrivateKey:    []byte(privateKey),
 		WebhookSecret: []byte(webhookSecret),
+		DatabaseURL:   os.Getenv("DATABASE_URL"),
 	}, nil
 }
