@@ -183,7 +183,7 @@ h1 .cursor {
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
 .hero-sub {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-mid);
   max-width: 520px;
   margin: 0 auto 40px;
@@ -315,7 +315,7 @@ h2 {
 }
 
 .section-sub {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-mid);
   max-width: 500px;
   margin-bottom: 52px;
@@ -340,7 +340,7 @@ h2 {
 }
 
 .problem-text p {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-mid);
   margin-bottom: 18px;
   line-height: 1.75;
@@ -450,7 +450,7 @@ h2 {
   margin-bottom: 10px;
 }
 .step p {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-mid);
   line-height: 1.7;
 }
@@ -491,7 +491,7 @@ h2 {
   letter-spacing: 0.02em;
 }
 .integration p {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-mid);
   margin-bottom: 20px;
   line-height: 1.65;
@@ -577,7 +577,7 @@ h2 {
 }
 
 .plan-desc {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
   margin-bottom: 28px;
   padding-bottom: 28px;
@@ -592,7 +592,7 @@ h2 {
   margin-bottom: 32px;
 }
 .plan li {
-  font-size: 13px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   gap: 10px;
