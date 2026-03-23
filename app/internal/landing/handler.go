@@ -514,6 +514,7 @@ h2 {
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   max-width: 700px;
+  margin: 0 auto;
 }
 
 .plan {
@@ -760,7 +761,7 @@ footer {
         <h2>Hidden in the merge,<br>invisible in the PR</h2>
         <p>When both parent branches contain <strong>identical files</strong>, Git's three-way merge algorithm outputs them unchanged. The only way to get a different result is to manually edit files during the merge.</p>
         <p>GitHub's PR diff doesn't show merge commits. <code>git log</code> doesn't surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
-        <p>This is how malicious code ran undetected in a production repository for <strong>3.5 months</strong> — on every developer machine and every CI build.</p>
+        <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> — on every developer machine and every CI build.</p>
       </div>
 
       <div class="diff-card">
