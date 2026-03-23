@@ -265,7 +265,7 @@ h1 .cursor {
 .terminal-body {
   padding: 20px 24px;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.9;
 }
 .t-dim { color: var(--text-dim); }
@@ -387,7 +387,7 @@ h2 {
 .diff-body {
   padding: 20px;
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 2;
 }
 .diff-line { display: flex; gap: 12px; }
@@ -397,7 +397,7 @@ h2 {
 .diff-value.bad { color: var(--red); font-weight: 700; }
 .diff-sep { height: 1px; background: var(--border); margin: 14px 0; }
 .diff-note {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 1.7;
   font-style: italic;
@@ -502,7 +502,7 @@ h2 {
   border-radius: 4px;
   padding: 14px 16px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: #79c0ff;
   overflow-x: auto;
   line-height: 1.8;
