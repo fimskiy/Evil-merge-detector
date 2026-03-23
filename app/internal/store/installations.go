@@ -41,6 +41,22 @@ func (s *Store) GetInstallation(ctx context.Context, installationID int64) (*Ins
 	return &inst, nil
 }
 
+func (s *Store) GetInstallationByLogin(ctx context.Context, login string) (*Installation, error) {
+	row := s.pool.QueryRow(ctx, `
+		SELECT installation_id, account_login, account_type, plan, installed_at, updated_at
+		FROM installations WHERE account_login = $1
+		ORDER BY installed_at DESC LIMIT 1
+	`, login)
+
+	var inst Installation
+	err := row.Scan(&inst.InstallationID, &inst.AccountLogin, &inst.AccountType,
+		&inst.Plan, &inst.InstalledAt, &inst.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &inst, nil
+}
+
 func (s *Store) UpdatePlan(ctx context.Context, installationID int64, plan string) error {
 	_, err := s.pool.Exec(ctx, `
 		UPDATE installations SET plan = $1, updated_at = NOW()

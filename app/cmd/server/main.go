@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/config"
+	"github.com/fimskiy/evil-merge-detector/app/internal/dashboard"
+	"github.com/fimskiy/evil-merge-detector/app/internal/oauth"
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 	"github.com/fimskiy/evil-merge-detector/app/internal/webhook"
 )
@@ -35,10 +37,23 @@ func main() {
 		log.Println("DATABASE_URL not set, running without database")
 	}
 
+	oauthHandler := oauth.New(cfg.OAuthClientID, cfg.OAuthClientSecret, cfg.SessionSecret, db)
+
 	mux := http.NewServeMux()
 	mux.Handle("/webhook", webhook.New(cfg, db))
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+	})
+	mux.HandleFunc("/auth/github", oauthHandler.Login)
+	mux.HandleFunc("/auth/callback", oauthHandler.Callback)
+	mux.HandleFunc("/auth/logout", oauthHandler.Logout)
+	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db))
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/dashboard", http.StatusFound)
+			return
+		}
+		http.NotFound(w, r)
 	})
 
 	srv := &http.Server{

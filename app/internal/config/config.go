@@ -7,11 +7,14 @@ import (
 )
 
 type Config struct {
-	Port          string
-	AppID         int64
-	PrivateKey    []byte
-	WebhookSecret []byte
-	DatabaseURL   string
+	Port               string
+	AppID              int64
+	PrivateKey         []byte
+	WebhookSecret      []byte
+	DatabaseURL        string
+	OAuthClientID      string
+	OAuthClientSecret  string
+	SessionSecret      []byte
 }
 
 func Load() (*Config, error) {
@@ -48,11 +51,19 @@ func Load() (*Config, error) {
 		port = "8080"
 	}
 
+	sessionSecret := os.Getenv("SESSION_SECRET")
+	if sessionSecret == "" {
+		return nil, fmt.Errorf("SESSION_SECRET is required")
+	}
+
 	return &Config{
-		Port:          port,
-		AppID:         appID,
-		PrivateKey:    []byte(privateKey),
-		WebhookSecret: []byte(webhookSecret),
-		DatabaseURL:   os.Getenv("DATABASE_URL"),
+		Port:              port,
+		AppID:             appID,
+		PrivateKey:        []byte(privateKey),
+		WebhookSecret:     []byte(webhookSecret),
+		DatabaseURL:       os.Getenv("DATABASE_URL"),
+		OAuthClientID:     os.Getenv("GITHUB_OAUTH_CLIENT_ID"),
+		OAuthClientSecret: os.Getenv("GITHUB_OAUTH_CLIENT_SECRET"),
+		SessionSecret:     []byte(sessionSecret),
 	}, nil
 }
