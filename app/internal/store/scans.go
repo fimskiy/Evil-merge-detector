@@ -27,6 +27,16 @@ func (s *Store) SaveScan(ctx context.Context, rec ScanRecord) error {
 	return err
 }
 
+func (s *Store) MonthlyScansCount(ctx context.Context, installationID int64) (int, error) {
+	var count int
+	err := s.pool.QueryRow(ctx, `
+		SELECT COUNT(*) FROM scans
+		WHERE installation_id = $1
+		  AND scanned_at >= date_trunc('month', NOW())
+	`, installationID).Scan(&count)
+	return count, err
+}
+
 func (s *Store) RecentScans(ctx context.Context, installationID int64, limit int) ([]ScanRecord, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT installation_id, owner, repo, pr_number, head_sha,

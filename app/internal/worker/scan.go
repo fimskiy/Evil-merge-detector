@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -25,6 +26,7 @@ type PRJob struct {
 	AppID          int64
 	PrivateKey     []byte
 	DB             *store.Store
+	Pro            bool
 }
 
 func ScanPR(job PRJob) {
@@ -41,6 +43,20 @@ func ScanPR(job PRJob) {
 	if err != nil {
 		log.Printf("error creating check run for %s/%s: %v", job.Owner, job.Repo, err)
 		return
+	}
+
+	if job.DB != nil && !job.Pro {
+		count, err := job.DB.MonthlyScansCount(ctx, job.InstallationID)
+		if err != nil {
+			log.Printf("monthly scan count for %s/%s: %v", job.Owner, job.Repo, err)
+		} else if count >= 50 {
+			log.Printf("free plan limit reached for installation %d", job.InstallationID)
+			limitErr := fmt.Errorf("monthly scan limit reached (50/month on Free plan). Upgrade to Pro at https://evil-merge-detector.fly.dev/#pricing")
+			if err := ghclient.FailCheckRun(ctx, client, job.Owner, job.Repo, runID, limitErr); err != nil {
+				log.Printf("error failing check run: %v", err)
+			}
+			return
+		}
 	}
 
 	result, scanErr := runScan(ctx, job)

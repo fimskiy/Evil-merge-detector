@@ -39,7 +39,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	switch e := event.(type) {
 	case *github.PullRequestEvent:
-		h.handlePR(e)
+		h.handlePR(r, e)
 	case *github.InstallationEvent:
 		h.handleInstallation(ctx, e)
 	case *github.MarketplacePurchaseEvent:
@@ -47,13 +47,22 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) handlePR(e *github.PullRequestEvent) {
+func (h *Handler) handlePR(r *http.Request, e *github.PullRequestEvent) {
 	action := e.GetAction()
 	if action != "opened" && action != "synchronize" && action != "reopened" {
 		return
 	}
 
 	pr := e.GetPullRequest()
+	installationID := e.GetInstallation().GetID()
+
+	var pro bool
+	if h.db != nil {
+		if inst, err := h.db.GetInstallation(r.Context(), installationID); err == nil {
+			pro = inst.Plan == "pro"
+		}
+	}
+
 	job := worker.PRJob{
 		Owner:          e.GetRepo().GetOwner().GetLogin(),
 		Repo:           e.GetRepo().GetName(),
@@ -61,10 +70,11 @@ func (h *Handler) handlePR(e *github.PullRequestEvent) {
 		HeadSHA:        pr.GetHead().GetSHA(),
 		HeadRef:        pr.GetHead().GetRef(),
 		PRNumber:       pr.GetNumber(),
-		InstallationID: e.GetInstallation().GetID(),
+		InstallationID: installationID,
 		AppID:          h.cfg.AppID,
 		PrivateKey:     h.cfg.PrivateKey,
 		DB:             h.db,
+		Pro:            pro,
 	}
 
 	log.Printf("scanning PR #%d in %s/%s (%.7s)", pr.GetNumber(), job.Owner, job.Repo, job.HeadSHA)
