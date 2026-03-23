@@ -87,6 +87,20 @@ Re-run with --format=json for full details on each merge.
 | **WARNING** | File changed in one branch, but merge result differs from both parents |
 | **INFO** | File changed in both branches (conflict zone) — likely legitimate conflict resolution, worth reviewing |
 
+## GitHub App
+
+The easiest way to get started — install once and every pull request in your organization is automatically scanned. No workflow changes needed.
+
+**[Install from GitHub Marketplace →](https://github.com/marketplace/evil-merge-detector)**
+
+- Automatic scan on every PR via GitHub Checks
+- Results appear directly in the pull request
+- Scan history available at [evil-merge-detector.fly.dev/dashboard](https://evil-merge-detector.fly.dev/dashboard)
+
+**Plans:** Free (public repos, 50 scans/month) · Pro $7/month (private repos, unlimited scans, dashboard)
+
+---
+
 ## GitHub Action
 
 Add to your workflow to automatically check PRs for evil merges:
