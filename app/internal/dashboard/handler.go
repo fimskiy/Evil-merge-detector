@@ -2,8 +2,8 @@ package dashboard
 
 import (
 	"html/template"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/session"
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
@@ -47,11 +47,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	h.tmpl.Execute(w, data)
-}
-
-func fmtTime(t time.Time) string {
-	return t.UTC().Format("2006-01-02 15:04")
+	if err := h.tmpl.Execute(w, data); err != nil {
+		log.Printf("dashboard template: %v", err)
+	}
 }
 
 var dashboardTmpl = `<!DOCTYPE html>
