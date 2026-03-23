@@ -102,7 +102,7 @@ nav {
   display: flex;
   gap: 32px;
   font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text-mid);
 }
 .nav-links a { transition: color 0.15s; }
 .nav-links a:hover { color: var(--text); }
@@ -141,9 +141,10 @@ nav {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-dim);
-  border: 1px solid var(--border);
-  padding: 5px 14px;
+  color: #c9d1d9;
+  background: rgba(230,57,70,0.1);
+  border: 1px solid rgba(230,57,70,0.35);
+  padding: 6px 16px;
   border-radius: 2px;
   margin-bottom: 36px;
 }
@@ -371,7 +372,7 @@ h2 {
 .diff-filename {
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-mid);
 }
 .diff-badge {
   font-family: var(--mono);
@@ -391,7 +392,7 @@ h2 {
   line-height: 2;
 }
 .diff-line { display: flex; gap: 12px; }
-.diff-label { color: var(--text-dim); min-width: 70px; flex-shrink: 0; }
+.diff-label { color: var(--text-mid); min-width: 70px; flex-shrink: 0; }
 .diff-value { color: var(--text-mid); }
 .diff-value.clean { color: var(--green); }
 .diff-value.bad { color: var(--red); font-weight: 700; }
@@ -660,7 +661,7 @@ footer {
 .footer-logo {
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text-mid);
 }
 .footer-logo .accent { color: var(--red); }
 .footer-links {
@@ -668,7 +669,7 @@ footer {
   gap: 28px;
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-mid);
 }
 .footer-links a { transition: color 0.15s; }
 .footer-links a:hover { color: var(--text); }
