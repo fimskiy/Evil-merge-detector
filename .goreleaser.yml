@@ -22,15 +22,6 @@ archives:
         formats: ['zip']
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-brews:
-  - repository:
-      owner: fimskiy
-      name: homebrew-tap
-    homepage: "https://github.com/fimskiy/evil-merge-detector"
-    description: "Detect evil merges in Git repositories"
-    install: |
-      bin.install "evilmerge"
-
 checksum:
   name_template: "checksums.txt"
 

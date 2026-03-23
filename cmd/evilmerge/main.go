@@ -26,7 +26,6 @@ beyond conflict resolution — changes that weren't in either parent branch.
 These "evil merges" bypass code review and can hide bugs or malicious code.`,
 	}
 
-	// scan command
 	var (
 		scanBranch   string
 		scanSince    string
@@ -60,9 +59,11 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				defer cancel()
 			}
 
-			// Print header
-			if _, err := fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version); err != nil {
-				return err
+			// Print header (skip for machine-readable formats)
+			if scanFormat != "json" && scanFormat != "sarif" {
+				if _, err := fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version); err != nil {
+					return err
+				}
 			}
 
 			s := scanner.New()
@@ -76,7 +77,6 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				return reporter.PrintDetail(os.Stdout, report)
 			}
 
-			// Normal scan mode
 			opts := models.ScanOptions{
 				RepoPath:    repoPath,
 				Branch:      scanBranch,
@@ -107,7 +107,6 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				return err
 			}
 
-			// Output results
 			var rep reporter.Reporter
 			switch scanFormat {
 			case "json":
@@ -145,7 +144,6 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 	scanCmd.Flags().StringVar(&scanCommit, "commit", "", "Inspect a specific merge commit in detail (by full or short hash)")
 	scanCmd.Flags().DurationVar(&scanTimeout, "timeout", 0, "Maximum scan duration, e.g. 30s, 5m (0 = unlimited)")
 
-	// version command
 	var versionCmd = &cobra.Command{
 		Use:   "version",
 		Short: "Print version information",

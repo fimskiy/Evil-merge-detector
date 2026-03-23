@@ -13,7 +13,6 @@ type JSONReporter struct {
 	Pretty bool
 }
 
-// NewJSON creates a new JSONReporter.
 func NewJSON(pretty bool) *JSONReporter {
 	return &JSONReporter{Pretty: pretty}
 }

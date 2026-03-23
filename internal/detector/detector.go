@@ -19,7 +19,6 @@ var sensitivePatterns = []string{
 // Detector analyzes merge commits for evil changes.
 type Detector struct{}
 
-// New creates a new Detector.
 func New() *Detector {
 	return &Detector{}
 }

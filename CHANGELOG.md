@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-03-23
 
 ### Added
 - CLI utility `evilmerge` for detecting evil merges in Git repositories
@@ -20,5 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filtering by date (`--since`, `--until`), branch (`--branch`), severity (`--severity`)
 - Commit limit (`--limit`) for large repositories
 - `--fail-on` flag for CI pipelines (exit code 1 on findings)
-- GoReleaser configuration for cross-platform builds
-- GitHub Actions CI/CD pipeline (test, lint, release)
+- GitHub Action composite wrapper (`uses: fimskiy/Evil-merge-detector@v1`) with annotations, job summary, and SARIF upload support
+- GoReleaser configuration for cross-platform builds (Linux, macOS, Windows — amd64/arm64)
+- GitHub Actions CI/CD pipeline (test, lint, shellcheck, release)

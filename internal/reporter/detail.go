@@ -14,7 +14,6 @@ import (
 func PrintDetail(w io.Writer, report *models.MergeReport) error {
 	sep := strings.Repeat("─", 60)
 
-	// Commit metadata
 	if _, err := fmt.Fprintf(w, "\nCommit:   %s\n", report.CommitHash); err != nil {
 		return err
 	}

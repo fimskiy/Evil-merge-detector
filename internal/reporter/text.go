@@ -12,7 +12,6 @@ import (
 // TextReporter outputs human-readable colored table output.
 type TextReporter struct{}
 
-// NewText creates a new TextReporter.
 func NewText() *TextReporter {
 	return &TextReporter{}
 }
@@ -43,7 +42,6 @@ func (r *TextReporter) Report(w io.Writer, result *models.ScanResult) error {
 		return nil
 	}
 
-	// Print table header
 	header := fmt.Sprintf("%-10s  %-50s  %-25s  %s", "SEVERITY", "COMMIT", "AUTHOR", "FILES")
 	if _, err := fmt.Fprintln(w, header); err != nil {
 		return err
@@ -53,7 +51,6 @@ func (r *TextReporter) Report(w io.Writer, result *models.ScanResult) error {
 	}
 
 	for _, report := range result.Reports {
-		// Truncate message to first line, max 40 chars
 		msg := strings.Split(report.Message, "\n")[0]
 		if len(msg) > 40 {
 			msg = msg[:37] + "..."
@@ -64,7 +61,6 @@ func (r *TextReporter) Report(w io.Writer, result *models.ScanResult) error {
 			commitInfo = commitInfo[:47] + "..."
 		}
 
-		// Collect affected file names
 		var files []string
 		for _, ec := range report.EvilChanges {
 			files = append(files, ec.FilePath)

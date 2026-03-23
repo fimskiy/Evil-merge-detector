@@ -22,7 +22,6 @@ type ruleSpec struct {
 	Level            string
 }
 
-// ruleSpecs defines all supported detection rules.
 var ruleSpecs = []ruleSpec{
 	{
 		ID:               "EMD001",
@@ -102,8 +101,6 @@ func severityToSarifLevel(s models.Severity) string {
 	}
 }
 
-// --- SARIF struct types ---
-
 type sarifOutput struct {
 	Schema  string     `json:"$schema"`
 	Version string     `json:"version"`
@@ -159,20 +156,16 @@ type sarifArtifactLocation struct {
 	URIBaseID string `json:"uriBaseId,omitempty"`
 }
 
-// --- Reporter ---
-
 // SARIFReporter outputs SARIF 2.1.0 for GitHub Code Scanning.
 type SARIFReporter struct {
 	// ToolVersion is injected by the caller (matches binary version).
 	ToolVersion string
 }
 
-// NewSARIF creates a new SARIFReporter.
 func NewSARIF(version string) *SARIFReporter {
 	return &SARIFReporter{ToolVersion: version}
 }
 
-// Report writes a SARIF document to w.
 func (r *SARIFReporter) Report(w io.Writer, result *models.ScanResult) error {
 	rules := make([]sarifRuleJSON, len(ruleSpecs))
 	for i, spec := range ruleSpecs {

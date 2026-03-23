@@ -1,0 +1,55 @@
+name: 'Evil Merge Detector'
+description: 'Detect evil merges in pull requests — changes smuggled into merge commits that bypass code review'
+author: 'fimskiy'
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  fail-on:
+    description: 'Minimum severity to fail the check (info|warning|critical)'
+    default: 'warning'
+  severity:
+    description: 'Minimum severity to report (info|warning|critical)'
+    default: 'info'
+  branch:
+    description: 'Branch to scan (default: auto-detect from PR context)'
+    default: ''
+  since:
+    description: 'Only scan merges after this date (YYYY-MM-DD)'
+    default: ''
+  version:
+    description: 'Version of evilmerge binary to use'
+    default: 'latest'
+  upload-sarif:
+    description: 'Upload SARIF results to GitHub Code Scanning'
+    default: 'false'
+
+outputs:
+  evil-merges-found:
+    description: 'Whether evil merges were found (true/false)'
+    value: ${{ steps.scan.outputs.found }}
+  evil-merge-count:
+    description: 'Number of evil merge commits found'
+    value: ${{ steps.scan.outputs.count }}
+
+runs:
+  using: composite
+  steps:
+    - name: Detect evil merges
+      id: scan
+      shell: bash
+      run: ${{ github.action_path }}/action/entrypoint.sh
+      env:
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_SEVERITY: ${{ inputs.severity }}
+        INPUT_BRANCH: ${{ inputs.branch }}
+        INPUT_SINCE: ${{ inputs.since }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_UPLOAD_SARIF: ${{ inputs.upload-sarif }}
+
+    - name: Upload SARIF to Code Scanning
+      if: always() && inputs.upload-sarif == 'true'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: evil-merge-results.sarif

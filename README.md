@@ -87,9 +87,60 @@ Re-run with --format=json for full details on each merge.
 | **WARNING** | File changed in one branch, but merge result differs from both parents |
 | **INFO** | File changed in both branches (conflict zone) — likely legitimate conflict resolution, worth reviewing |
 
-## CI/CD Integration
+## GitHub Action
 
-Add to your GitHub Actions workflow:
+Add to your workflow to automatically check PRs for evil merges:
+
+```yaml
+name: Evil Merge Check
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: fimskiy/Evil-merge-detector@v1
+        with:
+          fail-on: warning
+```
+
+### Action inputs
+
+| Input | Description | Default |
+|-------|-------------|---------|
+| `fail-on` | Minimum severity to fail the check (`info`/`warning`/`critical`) | `warning` |
+| `severity` | Minimum severity to report | `info` |
+| `branch` | Branch to scan (auto-detected from PR by default) | — |
+| `since` | Only scan merges after this date (YYYY-MM-DD) | — |
+| `version` | Version of evilmerge to use | `latest` |
+| `upload-sarif` | Upload SARIF results to Code Scanning | `false` |
+
+### Action outputs
+
+| Output | Description |
+|--------|-------------|
+| `evil-merges-found` | `true` if evil merges were found |
+| `evil-merge-count` | Number of evil merge commits found |
+
+### With SARIF upload
+
+```yaml
+- uses: fimskiy/Evil-merge-detector@v1
+  with:
+    fail-on: warning
+    upload-sarif: true
+```
+
+Findings will appear in **Security → Code scanning alerts** with severity, affected file, and commit fingerprint.
+
+## CI/CD Integration (manual)
+
+If you prefer to install the binary directly:
 
 ```yaml
 - name: Check for evil merges
@@ -97,24 +148,6 @@ Add to your GitHub Actions workflow:
     go install github.com/fimskiy/evil-merge-detector/cmd/evilmerge@latest
     evilmerge scan --branch=main --fail-on=warning
 ```
-
-## GitHub Code Scanning (SARIF)
-
-Upload results to GitHub's Security tab using the SARIF format:
-
-```yaml
-- name: Scan for evil merges
-  run: |
-    go install github.com/fimskiy/evil-merge-detector/cmd/evilmerge@latest
-    evilmerge scan --format=sarif > results.sarif
-
-- name: Upload to GitHub Code Scanning
-  uses: github/codeql-action/upload-sarif@v3
-  with:
-    sarif_file: results.sarif
-```
-
-Findings will appear in **Security → Code scanning alerts** with severity, affected file, and commit fingerprint.
 
 ## Flags
 
