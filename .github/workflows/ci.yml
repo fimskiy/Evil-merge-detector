@@ -3,10 +3,56 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint action entrypoint
+        run: shellcheck --severity=warning action/entrypoint.sh
+
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      - name: Build binary
+        run: |
+          mkdir -p ~/.local/bin
+          go build -o ~/.local/bin/evilmerge ./cmd/evilmerge
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run action (no evil merges expected in this repo)
+        id: run-action
+        run: bash action/entrypoint.sh
+        env:
+          INPUT_VERSION: prebuilt
+          INPUT_FAIL_ON: warning
+          INPUT_SEVERITY: info
+          INPUT_BRANCH: ""
+          INPUT_SINCE: ""
+          INPUT_UPLOAD_SARIF: "false"
+
+      - name: Verify outputs
+        run: |
+          echo "found=${{ steps.run-action.outputs.found }}"
+          echo "count=${{ steps.run-action.outputs.count }}"
+          [[ "${{ steps.run-action.outputs.found }}"  != "" ]] || { echo "ERROR: 'found' output is empty"; exit 1; }
+          [[ "${{ steps.run-action.outputs.count }}"  != "" ]] || { echo "ERROR: 'count' output is empty"; exit 1; }
+
   test:
     runs-on: ubuntu-latest
     steps:
