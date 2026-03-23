@@ -22,6 +22,9 @@ var page = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Evil Merge Detector — Find hidden code in Git merge commits</title>
 <meta name="description" content="Automatically detect evil merges — merge commits that introduce changes not present in either parent branch. CLI, GitHub Action, and GitHub App.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #07090d;
@@ -35,15 +38,20 @@ var page = `<!DOCTYPE html>
   --green: #2dce89;
   --amber: #f4a261;
   --text: #c9d1d9;
-  --text-dim: #586069;
+  --text-dim: #737d88;
   --text-mid: #8b949e;
-  --mono: 'Courier New', Courier, monospace;
+  --mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 64px;
+}
 
 body {
   font-family: var(--sans);
@@ -55,6 +63,12 @@ body {
 
 a { color: inherit; text-decoration: none; }
 code { font-family: var(--mono); }
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
 
 /* GRID BACKGROUND */
 .grid-bg {
@@ -91,17 +105,21 @@ nav {
 
 .nav-logo {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.03em;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+.nav-logo svg { width: 26px; height: 26px; flex-shrink: 0; }
 .nav-logo .accent { color: var(--red); }
 
 .nav-links {
   display: flex;
   gap: 32px;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-mid);
 }
 .nav-links a { transition: color 0.15s; }
@@ -116,12 +134,25 @@ nav {
   background: var(--red);
   color: #fff;
   border-radius: 4px;
-  transition: opacity 0.15s, box-shadow 0.15s;
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.15s var(--ease-out);
 }
 .nav-cta:hover {
   opacity: 0.88;
   box-shadow: 0 0 20px var(--red-glow);
+  transform: translateY(-1px);
 }
+
+/* HERO ENTRANCE ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow { animation: fadeUp 0.5s var(--ease-out) 0.05s both; }
+.hero h1      { animation: fadeUp 0.55s var(--ease-out) 0.15s both; }
+.hero-sub     { animation: fadeUp 0.55s var(--ease-out) 0.25s both; }
+.hero-actions { animation: fadeUp 0.5s var(--ease-out) 0.35s both; }
+.terminal     { animation: fadeUp 0.6s var(--ease-out) 0.45s both; }
 
 /* HERO */
 .hero {
@@ -158,12 +189,12 @@ nav {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--red-glow); }
-  50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
+  50%       { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
 }
 
 h1 {
   font-family: var(--mono);
-  font-size: 54px;
+  font-size: clamp(2rem, 5vw + 0.5rem, 3.375rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -171,7 +202,12 @@ h1 {
   margin-bottom: 24px;
   color: #e6edf3;
 }
-h1 .threat { color: var(--red); }
+h1 .threat {
+  background: linear-gradient(135deg, #e63946 0%, #ff7070 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 h1 .cursor {
   display: inline-block;
   width: 3px;
@@ -209,12 +245,14 @@ h1 .cursor {
   background: var(--red);
   color: #fff;
   border-radius: 4px;
-  transition: opacity 0.15s, box-shadow 0.2s;
+  transition: opacity 0.15s, box-shadow 0.2s, transform 0.15s var(--ease-out);
 }
 .btn-primary:hover {
   opacity: 0.9;
   box-shadow: 0 0 30px var(--red-glow);
+  transform: translateY(-2px);
 }
+.btn-primary:active { transform: translateY(0); }
 
 .btn-secondary {
   font-family: var(--mono);
@@ -227,12 +265,14 @@ h1 .cursor {
   color: var(--text-mid);
   border: 1px solid var(--border-bright);
   border-radius: 4px;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s, transform 0.15s var(--ease-out);
 }
 .btn-secondary:hover {
   color: var(--text);
   border-color: rgba(255,255,255,0.25);
+  transform: translateY(-2px);
 }
+.btn-secondary:active { transform: translateY(0); }
 
 /* TERMINAL */
 .terminal {
@@ -243,7 +283,10 @@ h1 .cursor {
   max-width: 620px;
   margin: 0 auto;
   text-align: left;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 0 60px rgba(230,57,70,0.04);
 }
 .terminal-bar {
   display: flex;
@@ -269,12 +312,56 @@ h1 .cursor {
   font-size: 15px;
   line-height: 1.9;
 }
-.t-dim { color: var(--text-dim); }
+.t-dim    { color: var(--text-dim); }
 .t-prompt { color: var(--text-mid); }
-.t-cmd { color: #79c0ff; }
-.t-bad { color: var(--red); font-weight: 700; }
-.t-warn { color: var(--amber); }
-.t-ok { color: var(--green); }
+.t-cmd    { color: #79c0ff; }
+.t-bad    { color: var(--red); font-weight: 700; }
+.t-warn   { color: var(--amber); }
+.t-ok     { color: var(--green); }
+
+/* STATS BAR */
+.stats-bar {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 24px;
+  background: rgba(255,255,255,0.012);
+}
+.stats-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 44px;
+  flex: 1;
+  max-width: 200px;
+}
+.stat + .stat { border-left: 1px solid var(--border); }
+.stat-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: #e6edf3;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.stat-val .accent { color: var(--red); }
+.stat-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 4px;
+  white-space: nowrap;
+}
 
 /* SECTIONS */
 section {
@@ -287,7 +374,7 @@ section {
 
 .label {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--red);
@@ -306,7 +393,7 @@ section {
 
 h2 {
   font-family: var(--mono);
-  font-size: 30px;
+  font-size: clamp(1.375rem, 2vw + 0.5rem, 1.875rem);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: -0.01em;
@@ -395,7 +482,7 @@ h2 {
 .diff-label { color: var(--text-mid); min-width: 70px; flex-shrink: 0; }
 .diff-value { color: var(--text-mid); }
 .diff-value.clean { color: var(--green); }
-.diff-value.bad { color: var(--red); font-weight: 700; }
+.diff-value.bad   { color: var(--red); font-weight: 700; }
 .diff-sep { height: 1px; background: var(--border); margin: 14px 0; }
 .diff-note {
   font-size: 13px;
@@ -422,14 +509,23 @@ h2 {
   transition: background 0.2s;
 }
 .step:hover { background: var(--bg3); }
+.step::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--red);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-out);
+}
+.step:hover::before { opacity: 1; }
 .step-num {
   font-family: var(--mono);
   font-size: 72px;
   font-weight: 700;
-  color: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.04);
   position: absolute;
-  top: -8px;
-  right: 16px;
+  top: -8px; right: 16px;
   line-height: 1;
   user-select: none;
 }
@@ -467,16 +563,21 @@ h2 {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 28px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, transform 0.2s var(--ease-out), box-shadow 0.2s;
 }
-.integration:hover { border-color: var(--border-bright); }
+.integration:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
 .int-icon {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-dim);
-  background: rgba(255,255,255,0.05);
+  color: var(--text-mid);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   display: inline-block;
   padding: 3px 8px;
   border-radius: 2px;
@@ -503,7 +604,7 @@ h2 {
   border-radius: 4px;
   padding: 14px 16px;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 13px;
   color: #79c0ff;
   overflow-x: auto;
   line-height: 1.8;
@@ -524,7 +625,10 @@ h2 {
   border-radius: 6px;
   padding: 36px;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
+.plan .plan-btn { margin-top: auto; }
 
 .plan.featured {
   border-color: rgba(230,57,70,0.4);
@@ -533,8 +637,7 @@ h2 {
 .plan.featured::before {
   content: 'RECOMMENDED';
   position: absolute;
-  top: -1px;
-  right: 24px;
+  top: -1px; right: 24px;
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.12em;
@@ -549,7 +652,7 @@ h2 {
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-mid);
   margin-bottom: 16px;
 }
 
@@ -632,11 +735,12 @@ h2 {
   border-radius: 4px;
   border: 1px solid var(--border-bright);
   color: var(--text-mid);
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s, transform 0.15s var(--ease-out);
 }
 .plan-btn:hover {
   color: var(--text);
   border-color: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
 }
 .plan.featured .plan-btn {
   background: var(--red);
@@ -646,6 +750,30 @@ h2 {
 .plan.featured .plan-btn:hover {
   opacity: 0.88;
   box-shadow: 0 0 24px var(--red-glow);
+}
+
+/* BOTTOM CTA */
+.cta-section {
+  text-align: center;
+  background: radial-gradient(ellipse 70% 100% at 50% 50%, rgba(230,57,70,0.07) 0%, transparent 70%);
+  border-top: 1px solid var(--border);
+}
+.cta-section h2 {
+  max-width: 600px;
+  margin: 0 auto 16px;
+}
+.cta-section .section-sub {
+  margin: 0 auto 36px;
+}
+.cta-section .label {
+  justify-content: center;
+}
+.cta-section .label::before { display: none; }
+.cta-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* FOOTER */
@@ -673,14 +801,28 @@ footer {
 }
 .footer-links a { transition: color 0.15s; }
 .footer-links a:hover { color: var(--text); }
+.footer-gh-link { color: #58a6ff; }
+.footer-gh-link:hover { color: #79bcff; }
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
-  h1 { font-size: 32px; }
-  h2 { font-size: 22px; }
   .hero { padding: 72px 20px 60px; }
+  .terminal-body { font-size: 13px; padding: 16px 18px; }
+  .stats-inner { flex-wrap: wrap; }
+  .stat { min-width: 50%; padding: 20px 0; border-left: none !important; }
+  .stat:nth-child(even) { border-left: 1px solid var(--border) !important; }
+  .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
   .problem-grid,
   .steps,
   .integrations,
@@ -695,34 +837,39 @@ footer {
 </head>
 <body>
 
-<div class="grid-bg"></div>
+<div class="grid-bg" aria-hidden="true"></div>
 
 <!-- NAV -->
-<nav>
-  <div class="nav-logo">EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT</div>
+<nav aria-label="Main navigation">
+  <div class="nav-logo">
+    <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M256 24L444 88L444 264C444 364 354 446 256 482C158 446 68 364 68 264L68 88Z" fill="#da3633"/><path d="M256 62L418 118L418 264C418 348 338 418 256 450C174 418 94 348 94 264L94 118Z" fill="#b91c1c"/><line x1="256" y1="168" x2="182" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="256" y1="168" x2="330" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="182" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="330" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><circle cx="256" cy="168" r="28" fill="white"/><circle cx="182" cy="256" r="24" fill="white"/><circle cx="256" cy="364" r="26" fill="white"/><circle cx="330" cy="256" r="32" fill="#7f1d1d"/><line x1="313" y1="239" x2="347" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/><line x1="347" y1="239" x2="313" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/></svg>
+    EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT
+  </div>
   <div class="nav-links">
     <a href="#how-it-works">How it works</a>
     <a href="#pricing">Pricing</a>
     <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
-    <a href="/dashboard">Dashboard</a>
   </div>
   <a class="nav-cta" href="https://github.com/apps/evil-merge-detector">Install App</a>
 </nav>
 
+<!-- MAIN CONTENT -->
+<main>
+
 <!-- HERO -->
 <div class="hero">
   <div class="hero-eyebrow">
-    <span class="dot"></span>
-    Now available on GitHub Marketplace
+    <span class="dot" aria-hidden="true"></span>
+    Coming soon to GitHub Marketplace
   </div>
 
   <h1>
     The merge commit<br>
-    that <span class="threat">wasn't</span> reviewed<span class="cursor"></span>
+    that <span class="threat">wasn't</span> reviewed<span class="cursor" aria-hidden="true"></span>
   </h1>
 
   <p class="hero-sub">
-    Evil Merge Detector finds merge commits that introduce changes not present in either parent branch —
+    Evil Merge Detector finds merge commits that introduce changes not present in either parent branch &mdash;
     the attack vector your code review misses.
   </p>
 
@@ -733,10 +880,10 @@ footer {
 
   <div class="terminal">
     <div class="terminal-bar">
-      <span class="dot-r"></span>
-      <span class="dot-y"></span>
-      <span class="dot-g"></span>
-      <span class="terminal-title">evilmerge — scan</span>
+      <span class="dot-r" aria-hidden="true"></span>
+      <span class="dot-y" aria-hidden="true"></span>
+      <span class="dot-g" aria-hidden="true"></span>
+      <span class="terminal-title">evilmerge &mdash; scan</span>
     </div>
     <div class="terminal-body">
       <div class="t-dim"># Scan your repository</div>
@@ -744,9 +891,31 @@ footer {
       <div>&nbsp;</div>
       <div class="t-bad">CRITICAL  ab90bd7  vite.config.js</div>
       <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Both parents had identical content.</div>
-      <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Merge result differs — manual edit detected.</div>
+      <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Merge result differs &mdash; manual edit detected.</div>
       <div>&nbsp;</div>
       <div class="t-ok">&#10003;  23 merge commits checked &nbsp;|&nbsp; 1 critical issue found</div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat">
+      <span class="stat-val"><span class="accent">0</span></span>
+      <span class="stat-label">False positives</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">3</span>
+      <span class="stat-label">Integrations</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">CLI</span>
+      <span class="stat-label">Works offline</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">Free</span>
+      <span class="stat-label">For public repos</span>
     </div>
   </div>
 </div>
@@ -760,9 +929,9 @@ footer {
       <div class="problem-text">
         <div class="label">The problem</div>
         <h2>Hidden in the merge,<br>invisible in the PR</h2>
-        <p>When both parent branches contain <strong>identical files</strong>, Git's three-way merge algorithm outputs them unchanged. The only way to get a different result is to manually edit files during the merge.</p>
-        <p>GitHub's PR diff doesn't show merge commits. <code>git log</code> doesn't surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
-        <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> — on every developer machine and every CI build.</p>
+        <p>When both parent branches contain <strong>identical files</strong>, Git&rsquo;s three-way merge algorithm outputs them unchanged. The only way to get a different result is to manually edit files during the merge.</p>
+        <p>GitHub&rsquo;s PR diff doesn&rsquo;t show merge commits. <code>git log</code> doesn&rsquo;t surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
+        <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> &mdash; on every developer machine and every CI build.</p>
       </div>
 
       <div class="diff-card">
@@ -805,19 +974,19 @@ footer {
 
     <div class="steps">
       <div class="step">
-        <div class="step-num">01</div>
+        <div class="step-num" aria-hidden="true">01</div>
         <div class="step-label">Step 01</div>
         <h3>Find the merge base</h3>
-        <p>Identify the common ancestor of the two parent commits — the starting point for the three-way merge algorithm.</p>
+        <p>Identify the common ancestor of the two parent commits &mdash; the starting point for the three-way merge algorithm.</p>
       </div>
       <div class="step">
-        <div class="step-num">02</div>
+        <div class="step-num" aria-hidden="true">02</div>
         <div class="step-label">Step 02</div>
         <h3>Reconstruct expected tree</h3>
         <p>Run a clean three-way merge of the parent trees. This is what Git would produce with no manual intervention.</p>
       </div>
       <div class="step">
-        <div class="step-num">03</div>
+        <div class="step-num" aria-hidden="true">03</div>
         <div class="step-label">Step 03</div>
         <h3>Compare against reality</h3>
         <p>Diff the expected tree against the actual merge commit. Any difference is a file manually edited during the merge.</p>
@@ -833,7 +1002,7 @@ footer {
   <div class="section-inner">
     <div class="label">Integrations</div>
     <h2>Works where you<br>already work</h2>
-    <p class="section-sub">Three ways to add evil merge detection — pick what fits your workflow.</p>
+    <p class="section-sub">Three ways to add evil merge detection &mdash; pick what fits your workflow.</p>
 
     <div class="integrations">
       <div class="integration">
@@ -884,7 +1053,7 @@ evilmerge scan .</pre>
           <li><span class="check">&#10003;</span> 50 PR scans / month</li>
           <li><span class="check">&#10003;</span> GitHub Checks integration</li>
           <li class="no"><span class="check">&ndash;</span> Private repositories</li>
-          <li class="no"><span class="check">&ndash;</span> Scan history dashboard</li>
+          <li><span class="check">&#10003;</span> Scan history dashboard</li>
           <li class="no"><span class="check">&ndash;</span> Unlimited scans</li>
         </ul>
         <a class="plan-btn" href="https://github.com/apps/evil-merge-detector">Install for free</a>
@@ -903,7 +1072,6 @@ evilmerge scan .</pre>
           <li><span class="check">&#10003;</span> Unlimited PR scans</li>
           <li><span class="check">&#10003;</span> GitHub Checks integration</li>
           <li><span class="check">&#10003;</span> Scan history dashboard</li>
-          <li><span class="check">&#10003;</span> Email alerts</li>
           <li><span class="check">&#10003;</span> Priority support</li>
         </ul>
         <a class="plan-btn" href="https://github.com/marketplace/evil-merge-detector">Upgrade to Pro</a>
@@ -912,11 +1080,25 @@ evilmerge scan .</pre>
   </div>
 </section>
 
+<!-- BOTTOM CTA -->
+<section class="cta-section">
+  <div class="section-inner">
+    <div class="label">Protect your codebase</div>
+    <h2>Your next merge could be<br>hiding something.</h2>
+    <p class="section-sub">Install the GitHub App and start scanning automatically &mdash; no workflow changes needed.</p>
+    <div class="cta-actions">
+      <a class="btn-primary" href="https://github.com/apps/evil-merge-detector">Install GitHub App</a>
+      <a class="btn-secondary" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT &mdash; open source on <a href="https://github.com/fimskiy/Evil-merge-detector" style="color:#58a6ff">GitHub</a></div>
+  <div class="footer-logo">EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT &mdash; open source on <a href="https://github.com/fimskiy/Evil-merge-detector" class="footer-gh-link">GitHub</a></div>
   <div class="footer-links">
-    <a href="/dashboard">Dashboard</a>
     <a href="https://github.com/fimskiy/Evil-merge-detector">Docs</a>
     <a href="https://github.com/apps/evil-merge-detector">Install</a>
   </div>
