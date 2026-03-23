@@ -60,7 +60,11 @@ func runScan(ctx context.Context, job PRJob) (*models.ScanResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			log.Printf("cleanup %s: %v", tmpDir, err)
+		}
+	}()
 
 	if err := ghclient.Clone(ctx, job.AppID, job.InstallationID, job.PrivateKey, job.CloneURL, job.HeadRef, tmpDir); err != nil {
 		return nil, err
