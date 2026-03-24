@@ -3,6 +3,7 @@
 [![CI](https://github.com/fimskiy/Evil-merge-detector/actions/workflows/ci.yml/badge.svg)](https://github.com/fimskiy/Evil-merge-detector/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fimskiy/evil-merge-detector)](https://goreportcard.com/report/github.com/fimskiy/evil-merge-detector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/fimskiy)
 
 Detect **evil merges** in Git repositories — merge commits that contain changes beyond conflict resolution, invisible to code review.
 
