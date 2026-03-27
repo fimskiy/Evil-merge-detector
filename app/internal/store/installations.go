@@ -71,3 +71,38 @@ func (s *Store) DeleteInstallation(ctx context.Context, installationID int64) er
 	`, installationID)
 	return err
 }
+
+// ListPendingFullScans returns installations that have never been fully scanned
+// or whose last full scan was more than 30 days ago.
+func (s *Store) ListPendingFullScans(ctx context.Context) ([]Installation, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT installation_id, account_login, account_type, plan, installed_at, updated_at
+		FROM installations
+		WHERE last_full_scan_at IS NULL
+		   OR last_full_scan_at < NOW() - INTERVAL '30 days'
+		ORDER BY installed_at
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []Installation
+	for rows.Next() {
+		var inst Installation
+		if err := rows.Scan(&inst.InstallationID, &inst.AccountLogin, &inst.AccountType,
+			&inst.Plan, &inst.InstalledAt, &inst.UpdatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, inst)
+	}
+	return list, rows.Err()
+}
+
+func (s *Store) MarkFullScanned(ctx context.Context, installationID int64) error {
+	_, err := s.pool.Exec(ctx, `
+		UPDATE installations SET last_full_scan_at = NOW()
+		WHERE installation_id = $1
+	`, installationID)
+	return err
+}

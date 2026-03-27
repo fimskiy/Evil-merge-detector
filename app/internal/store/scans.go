@@ -37,6 +37,26 @@ func (s *Store) MonthlyScansCount(ctx context.Context, installationID int64) (in
 	return count, err
 }
 
+// LastScan returns the most recent scan record for the given repository, or nil if none exists.
+func (s *Store) LastScan(ctx context.Context, owner, repo string) (*ScanRecord, error) {
+	row := s.pool.QueryRow(ctx, `
+		SELECT installation_id, owner, repo, pr_number, head_sha,
+		       evil_merges, total_merges, duration_ms, scanned_at
+		FROM scans
+		WHERE owner = $1 AND repo = $2
+		ORDER BY scanned_at DESC
+		LIMIT 1
+	`, owner, repo)
+
+	var rec ScanRecord
+	err := row.Scan(&rec.InstallationID, &rec.Owner, &rec.Repo, &rec.PRNumber,
+		&rec.HeadSHA, &rec.EvilMerges, &rec.TotalMerges, &rec.DurationMs, &rec.ScannedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &rec, nil
+}
+
 func (s *Store) RecentScans(ctx context.Context, installationID int64, limit int) ([]ScanRecord, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT installation_id, owner, repo, pr_number, head_sha,

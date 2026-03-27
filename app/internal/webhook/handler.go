@@ -4,21 +4,25 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/go-github/v84/github"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/config"
+	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
+	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 	"github.com/fimskiy/evil-merge-detector/app/internal/worker"
 )
 
 type Handler struct {
-	cfg *config.Config
-	db  *store.Store
+	cfg      *config.Config
+	db       *store.Store
+	notifier *notifier.Notifier
 }
 
-func New(cfg *config.Config, db *store.Store) http.Handler {
-	return &Handler{cfg: cfg, db: db}
+func New(cfg *config.Config, db *store.Store, ntf *notifier.Notifier) http.Handler {
+	return &Handler{cfg: cfg, db: db, notifier: ntf}
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -74,6 +78,7 @@ func (h *Handler) handlePR(r *http.Request, e *github.PullRequestEvent) {
 		AppID:          h.cfg.AppID,
 		PrivateKey:     h.cfg.PrivateKey,
 		DB:             h.db,
+		Notifier:       h.notifier,
 		Pro:            pro,
 	}
 
@@ -99,10 +104,43 @@ func (h *Handler) handleInstallation(ctx context.Context, e *github.Installation
 		}); err != nil {
 			log.Printf("upsert installation %d: %v", inst.GetID(), err)
 		}
+		go h.triggerHistoryScan(inst.GetID())
 	case "deleted":
 		if err := h.db.DeleteInstallation(ctx, inst.GetID()); err != nil {
 			log.Printf("delete installation %d: %v", inst.GetID(), err)
 		}
+	}
+}
+
+func (h *Handler) triggerHistoryScan(installationID int64) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	repos, err := ghclient.ListRepos(ctx, h.cfg.AppID, installationID, h.cfg.PrivateKey)
+	if err != nil {
+		log.Printf("list repos for install %d: %v", installationID, err)
+		return
+	}
+	const maxConcurrent = 3
+	sem := make(chan struct{}, maxConcurrent)
+
+	for _, repo := range repos {
+		job := worker.HistoryJob{
+			Owner:          repo.Owner,
+			Repo:           repo.Name,
+			DefaultBranch:  repo.DefaultBranch,
+			CloneURL:       repo.CloneURL,
+			InstallationID: installationID,
+			AppID:          h.cfg.AppID,
+			PrivateKey:     h.cfg.PrivateKey,
+			DB:             h.db,
+			Notifier:       h.notifier,
+		}
+		sem <- struct{}{}
+		go func(j worker.HistoryJob) {
+			defer func() { <-sem }()
+			worker.ScanHistory(j)
+		}(job)
 	}
 }
 

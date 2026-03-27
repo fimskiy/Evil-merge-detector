@@ -1,0 +1,30 @@
+# Evil Merge Detector — Bitbucket Pipelines template
+#
+# Add the evil-merge-check step to your bitbucket-pipelines.yml to scan
+# pull requests for evil merges.
+#
+# Usage: copy the step into your existing pipeline or use this file as-is.
+
+image: alpine:3.19
+
+pipelines:
+  pull-requests:
+    "**":
+      - step:
+          name: Evil Merge Check
+          script:
+            - apk add --no-cache curl jq git
+            - |
+              EVILMERGE_VERSION=${EVILMERGE_VERSION:-latest}
+              if [ "$EVILMERGE_VERSION" = "latest" ]; then
+                EVILMERGE_VERSION=$(curl -sL https://api.github.com/repos/fimskiy/evil-merge-detector/releases/latest \
+                  | jq -r '.tag_name' | sed 's/^v//')
+              fi
+              OS="linux"
+              ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+              ARCHIVE="evilmerge_${EVILMERGE_VERSION}_${OS}_${ARCH}.tar.gz"
+              curl -sL --fail \
+                "https://github.com/fimskiy/evil-merge-detector/releases/download/v${EVILMERGE_VERSION}/${ARCHIVE}" \
+                | tar -xz -C /usr/local/bin evilmerge
+              chmod +x /usr/local/bin/evilmerge
+            - evilmerge scan --fail-on="${EVILMERGE_FAIL_ON:-warning}" .

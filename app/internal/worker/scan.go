@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-github/v84/github"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
+	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/fimskiy/evil-merge-detector/internal/scanner"
@@ -26,6 +27,7 @@ type PRJob struct {
 	AppID          int64
 	PrivateKey     []byte
 	DB             *store.Store
+	Notifier       *notifier.Notifier
 	Pro            bool
 }
 
@@ -86,6 +88,29 @@ func ScanPR(job PRJob) {
 		}
 		if err := job.DB.SaveScan(ctx, rec); err != nil {
 			log.Printf("saving scan record for %s/%s: %v", job.Owner, job.Repo, err)
+		}
+	}
+
+	if result.EvilMerges > 0 && job.Notifier != nil && job.Notifier.Enabled() {
+		ev := notifier.EvilMergeEvent{
+			Owner:      job.Owner,
+			Repo:       job.Repo,
+			PRNumber:   job.PRNumber,
+			HeadSHA:    job.HeadSHA,
+			EvilMerges: result.EvilMerges,
+			RepoURL:    "https://github.com/" + job.Owner + "/" + job.Repo,
+		}
+		for _, r := range result.Reports {
+			for _, ec := range r.EvilChanges {
+				ev.Findings = append(ev.Findings, notifier.Finding{
+					File:     ec.FilePath,
+					Severity: ec.Severity.String(),
+					Detail:   ec.Detail,
+				})
+			}
+		}
+		if err := job.Notifier.Notify(ctx, ev); err != nil {
+			log.Printf("notify %s/%s PR#%d: %v", job.Owner, job.Repo, job.PRNumber, err)
 		}
 	}
 }

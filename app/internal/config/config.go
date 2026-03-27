@@ -15,6 +15,8 @@ type Config struct {
 	OAuthClientID      string
 	OAuthClientSecret  string
 	SessionSecret      []byte
+	NotificationWebhookURL string
+	SlackWebhookURL        string
 }
 
 func Load() (*Config, error) {
@@ -61,9 +63,11 @@ func Load() (*Config, error) {
 		AppID:             appID,
 		PrivateKey:        []byte(privateKey),
 		WebhookSecret:     []byte(webhookSecret),
-		DatabaseURL:       os.Getenv("DATABASE_URL"),
-		OAuthClientID:     os.Getenv("GITHUB_OAUTH_CLIENT_ID"),
-		OAuthClientSecret: os.Getenv("GITHUB_OAUTH_CLIENT_SECRET"),
-		SessionSecret:     []byte(sessionSecret),
+		DatabaseURL:            os.Getenv("DATABASE_URL"),
+		OAuthClientID:          os.Getenv("GITHUB_OAUTH_CLIENT_ID"),
+		OAuthClientSecret:      os.Getenv("GITHUB_OAUTH_CLIENT_SECRET"),
+		SessionSecret:          []byte(sessionSecret),
+		NotificationWebhookURL: os.Getenv("NOTIFICATION_WEBHOOK_URL"),
+		SlackWebhookURL:        os.Getenv("SLACK_WEBHOOK_URL"),
 	}, nil
 }

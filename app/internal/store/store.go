@@ -54,6 +54,9 @@ func (s *Store) Migrate(ctx context.Context) error {
 
 		CREATE INDEX IF NOT EXISTS scans_installation_id_idx ON scans (installation_id);
 		CREATE INDEX IF NOT EXISTS scans_owner_repo_idx ON scans (owner, repo);
+
+		ALTER TABLE installations
+			ADD COLUMN IF NOT EXISTS last_full_scan_at TIMESTAMPTZ;
 	`)
 	return err
 }

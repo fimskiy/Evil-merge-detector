@@ -1,0 +1,73 @@
+#!/usr/bin/env sh
+# Evil Merge Detector — server-side pre-receive hook
+#
+# Installation (bare repository on self-hosted git server):
+#   cp pre-receive /path/to/repo.git/hooks/pre-receive
+#   chmod +x /path/to/repo.git/hooks/pre-receive
+#
+# Requirements:
+#   - evilmerge binary must be installed and available in PATH
+#     (download from https://github.com/fimskiy/evil-merge-detector/releases)
+#
+# Configuration via environment variables:
+#   EVILMERGE_FAIL_ON   — severity threshold: info | warning | critical  (default: warning)
+#   EVILMERGE_TIMEOUT   — max scan duration, e.g. 60s  (default: 30s)
+#   EVILMERGE_BIN       — path to evilmerge binary  (default: evilmerge)
+
+set -eu
+
+EVILMERGE="${EVILMERGE_BIN:-evilmerge}"
+FAIL_ON="${EVILMERGE_FAIL_ON:-warning}"
+TIMEOUT="${EVILMERGE_TIMEOUT:-30s}"
+
+# If the binary is missing, warn but don't block the push.
+if ! command -v "$EVILMERGE" >/dev/null 2>&1; then
+    echo "evilmerge: binary not found, skipping evil merge check" >&2
+    exit 0
+fi
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+rejected=0
+
+while read -r old new ref; do
+    # Skip deletions
+    [ "$new" = "0000000000000000000000000000000000000000" ] && continue
+
+    # Only check branch refs
+    case "$ref" in refs/heads/*) ;; *) continue ;; esac
+
+    # Find new merge commits introduced by this push
+    if [ "$old" = "0000000000000000000000000000000000000000" ]; then
+        range="$new"
+    else
+        range="${old}..${new}"
+    fi
+
+    merges=$(git log --merges --format="%H" "$range" 2>/dev/null) || continue
+    [ -z "$merges" ] && continue
+
+    # Create a temporary worktree to give evilmerge a non-bare working tree
+    worktree="${TMPDIR}/wt"
+    if ! git worktree add --detach "$worktree" "$new" >/dev/null 2>&1; then
+        echo "evilmerge: could not create worktree for ${ref}, skipping" >&2
+        continue
+    fi
+
+    branch="${ref#refs/heads/}"
+    output=$("$EVILMERGE" scan \
+        --fail-on="$FAIL_ON" \
+        --timeout="$TIMEOUT" \
+        "$worktree" 2>&1) || {
+        echo "--------------------------------------------------------------" >&2
+        echo "PUSH REJECTED: evil merge detected in branch '${branch}'" >&2
+        echo "$output" >&2
+        echo "--------------------------------------------------------------" >&2
+        rejected=1
+    }
+
+    git worktree remove --force "$worktree" >/dev/null 2>&1 || true
+done
+
+exit $rejected
