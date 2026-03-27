@@ -22,7 +22,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 func OGImageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Cache-Control", "public, max-age=86400")
-	w.Write(ogImage)
+	_, _ = w.Write(ogImage)
 }
 
 var page = `<!DOCTYPE html>
