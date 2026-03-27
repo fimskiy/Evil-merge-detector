@@ -32,7 +32,7 @@ func TestUpsertAndGetInstallation(t *testing.T) {
 	ctx := context.Background()
 
 	const id = int64(8_000_001)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, id) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, id) })
 
 	inst := store.Installation{
 		InstallationID: id,
@@ -61,7 +61,7 @@ func TestUpsertInstallation_UpdatesOnConflict(t *testing.T) {
 	ctx := context.Background()
 
 	const id = int64(8_000_002)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, id) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, id) })
 
 	base := store.Installation{InstallationID: id, AccountLogin: "old", AccountType: "User", Plan: "free"}
 	if err := db.UpsertInstallation(ctx, base); err != nil {
@@ -90,7 +90,7 @@ func TestGetInstallationByLogin(t *testing.T) {
 	ctx := context.Background()
 
 	const id = int64(8_000_003)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, id) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, id) })
 
 	if err := db.UpsertInstallation(ctx, store.Installation{
 		InstallationID: id,
@@ -115,7 +115,7 @@ func TestUpdatePlan(t *testing.T) {
 	ctx := context.Background()
 
 	const id = int64(8_000_004)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, id) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, id) })
 
 	if err := db.UpsertInstallation(ctx, store.Installation{
 		InstallationID: id, AccountLogin: "u", AccountType: "User", Plan: "free",
@@ -155,7 +155,7 @@ func TestMarkFullScannedAndListPending(t *testing.T) {
 	ctx := context.Background()
 
 	const id = int64(8_000_006)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, id) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, id) })
 
 	if err := db.UpsertInstallation(ctx, store.Installation{
 		InstallationID: id, AccountLogin: "u", AccountType: "User", Plan: "free",

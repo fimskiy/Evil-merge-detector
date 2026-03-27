@@ -135,7 +135,7 @@ func TestScanHistory_NotifierNotCalledOnCleanRepo(t *testing.T) {
 	run := func(args ...string) {
 		cmd := exec.Command("git", args...)
 		cmd.Dir = dir
-		cmd.Run()
+		_ = cmd.Run()
 	}
 	run("init", "-b", "main")
 	run("config", "user.email", "t@t.com")

@@ -59,7 +59,7 @@ func LoadIgnore(repoPath string) (*Ignore, error) {
 		}
 		return nil, fmt.Errorf("reading .evilmerge-ignore: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var ig Ignore
 	sc := bufio.NewScanner(f)
@@ -79,7 +79,7 @@ func LoadIgnore(repoPath string) (*Ignore, error) {
 
 func isHexString(s string) bool {
 	for _, r := range s {
-		if !((r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')) {
+		if (r < '0' || r > '9') && (r < 'a' || r > 'f') && (r < 'A' || r > 'F') {
 			return false
 		}
 	}
