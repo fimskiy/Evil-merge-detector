@@ -96,9 +96,19 @@ The easiest way to get started — install once and every pull request in your o
 
 - Automatic scan on every PR via GitHub Checks
 - Results appear directly in the pull request
+- Full history scan when you first install — catches past incidents
 - Scan history available at [evil-merge-detector.fly.dev/dashboard](https://evil-merge-detector.fly.dev/dashboard)
+- Slack / webhook notifications when evil merges are found
 
 **Plans:** Free (public repos, 50 scans/month) · Pro $7/month (private repos, unlimited scans, dashboard)
+
+**Status badge** — add to your README:
+
+```markdown
+![Evil Merges](https://evil-merge-detector.fly.dev/badge/owner/repo)
+```
+
+Shows `passing` (green) or `N found` (red) based on the latest scan result.
 
 ---
 
@@ -153,6 +163,16 @@ jobs:
 
 Findings will appear in **Security → Code scanning alerts** with severity, affected file, and commit fingerprint.
 
+## Other CI integrations
+
+Ready-to-use templates are in [`examples/`](examples/):
+
+| Platform | File |
+|----------|------|
+| GitLab CI | [`examples/gitlab-ci.yml`](examples/gitlab-ci.yml) |
+| Bitbucket Pipelines | [`examples/bitbucket-pipelines.yml`](examples/bitbucket-pipelines.yml) |
+| Self-hosted git (pre-receive hook) | [`examples/pre-receive`](examples/pre-receive) |
+
 ## CI/CD Integration (manual)
 
 If you prefer to install the binary directly:
@@ -171,12 +191,54 @@ If you prefer to install the binary directly:
 | `--branch` | Branch to scan | current HEAD |
 | `--since` | Scan commits after date (YYYY-MM-DD) | — |
 | `--until` | Scan commits before date (YYYY-MM-DD) | — |
-| `--severity` | Minimum severity: `info`, `warning`, `critical` | `info` |
+| `--since-tag` | Scan commits after this tag | — |
+| `--until-tag` | Scan commits before this tag | — |
+| `--severity` | Minimum severity to report: `info`, `warning`, `critical` | `info` |
 | `--limit` | Max merge commits to analyze | unlimited |
 | `--format` | Output format: `text`, `json`, `sarif` | `text` |
 | `--fail-on` | Exit code 1 if findings at or above severity | — |
 | `--commit` | Detailed inspection of a specific merge commit (hash) | — |
 | `--timeout` | Maximum scan duration, e.g. `30s`, `5m` | unlimited |
+| `--ignore-bots` | Skip merges by known bots (dependabot, renovate, etc.) | false |
+| `--exclude` | Exclude findings in files matching this glob (repeatable) | — |
+| `--include` | Only report findings in files matching this glob (repeatable) | — |
+| `--output` | Write results to file instead of stdout | — |
+| `--workers` | Number of parallel workers for merge analysis | 1 |
+| `--verbose` | Print each analyzed commit to stderr | false |
+
+## Configuration
+
+Project-level defaults live in `.evilmerge.yml` at the repository root. CLI flags override file values; `exclude`/`include` patterns are additive.
+
+```yaml
+# .evilmerge.yml
+fail-on: warning
+ignore-bots: true
+exclude:
+  - "*.lock"
+  - "dist/**"
+include:
+  - "src/**"
+output: results.sarif
+```
+
+### Ignore list
+
+Create `.evilmerge-ignore` to permanently whitelist specific commits or authors:
+
+```
+# Lines starting with # are comments
+
+# Commit hashes (7–40 hex chars, short prefix works)
+abc1234
+deadbeef12345678
+
+# Author names or emails
+legacy-bot@company.com
+Merge Bot
+```
+
+Anything that looks like a hex string (≥7 chars) is treated as a commit hash prefix; everything else is an author name or email.
 
 ## How it works
 
