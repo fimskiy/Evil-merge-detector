@@ -931,7 +931,7 @@ footer {
         <h2>Hidden in the merge,<br>invisible in the PR</h2>
         <p>When both parent branches contain <strong>identical files</strong>, Git&rsquo;s three-way merge algorithm outputs them unchanged. The only way to get a different result is to manually edit files during the merge.</p>
         <p>GitHub&rsquo;s PR diff doesn&rsquo;t show merge commits. <code>git log</code> doesn&rsquo;t surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
-        <p>Most teams discover it only after the fact &mdash; after the code has already shipped.</p>
+        <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> &mdash; on every developer machine and every CI build.</p>
       </div>
 
       <div class="diff-card">
