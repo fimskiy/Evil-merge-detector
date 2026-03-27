@@ -21,7 +21,7 @@ var page = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Detect Evil Merge Commits in Git — Evil Merge Detector</title>
-<meta name="description" content="Detect hidden code injected into Git merge commits. Evil Merge Detector scans your repo via CLI, GitHub Action, or GitHub App. Free for open source.">
+<meta name="description" content="Detect code injection via Git merge commits — a supply chain attack vector invisible to standard git security tools. CLI, GitHub Action, and GitHub App. Free for open source.">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <link rel="canonical" href="https://evilmerge.dev/">
 <meta property="og:type" content="website">
@@ -65,6 +65,9 @@ var page = `<!DOCTYPE html>
   ],
   "featureList": [
     "Evil merge commit detection",
+    "Supply chain attack prevention",
+    "Code injection detection via git merge history",
+    "Git security scanning",
     "Zero false positives",
     "CLI tool",
     "GitHub Action",
@@ -987,6 +990,7 @@ footer {
         <p>When both parent branches contain <strong>identical files</strong>, Git&rsquo;s three-way merge algorithm outputs them unchanged. The only way to get a different result is to manually edit files during the merge.</p>
         <p>GitHub&rsquo;s PR diff doesn&rsquo;t show merge commits. <code>git log</code> doesn&rsquo;t surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
         <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> &mdash; on every developer machine and every CI build.</p>
+        <p>It&rsquo;s a <strong>supply chain attack</strong> via code injection — and it bypasses every standard git security tool.</p>
       </div>
 
       <div class="diff-card">
