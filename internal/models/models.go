@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"io"
+	"time"
+)
 
 // Severity represents the severity level of an evil merge finding.
 type Severity int
@@ -83,10 +86,19 @@ type ScanResult struct {
 
 // ScanOptions configures the scanning behavior.
 type ScanOptions struct {
-	RepoPath    string
-	Branch      string
-	Since       *time.Time
-	Until       *time.Time
-	Limit       int
-	MinSeverity Severity
+	RepoPath       string
+	Branch         string
+	Since          *time.Time
+	Until          *time.Time
+	SinceTag       string
+	UntilTag       string
+	Limit          int
+	MinSeverity    Severity
+	Exclude        []string // file glob patterns to skip in findings
+	Include        []string // if non-empty, only report findings in matching paths
+	IgnoreBots     bool
+	IgnoredHashes  []string // commit hash prefixes to skip entirely
+	IgnoredAuthors []string // author names or emails to skip entirely
+	Workers        int       // parallel workers for analysis (0 or 1 = sequential)
+	Progress       io.Writer // if non-nil, print per-commit progress here (use os.Stderr)
 }

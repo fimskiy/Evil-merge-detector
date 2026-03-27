@@ -3,6 +3,7 @@ package detector
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/fimskiy/evil-merge-detector/internal/models"
@@ -14,7 +15,17 @@ import (
 var sensitivePatterns = []string{
 	".env", "credentials", "secret", "password", "token",
 	"auth", "crypto", "private", "key", ".pem", ".p12",
+	"webpack.config", "vite.config", "rollup.config", "esbuild.config",
+	".github/workflows/",
 }
+
+// jsExtensions are file extensions where JS-specific content patterns apply.
+var jsExtensions = map[string]bool{
+	".js": true, ".ts": true, ".mjs": true, ".cjs": true,
+	".jsx": true, ".tsx": true,
+}
+
+const longLineThreshold = 500
 
 // Detector analyzes merge commits for evil changes.
 type Detector struct{}
@@ -192,6 +203,7 @@ func (d *Detector) findEvilChanges(ct *commitTrees, withDiff bool) ([]models.Evi
 				content, _ := fileContent(ct.merge, path)
 				ec.Diff = formatAddedFile(content, ct.merge.Hash.String()[:7])
 			}
+			analyzeContent(ct.merge, path, &ec)
 			changes = append(changes, ec)
 			continue
 		}
@@ -212,6 +224,7 @@ func (d *Detector) findEvilChanges(ct *commitTrees, withDiff bool) ([]models.Evi
 				new, _ := fileContent(ct.merge, path)
 				ec.Diff = computeDiff(old, new, "P1 "+ct.p1Hash, "M  "+ct.merge.Hash.String()[:7])
 			}
+			analyzeContent(ct.merge, path, &ec)
 			changes = append(changes, ec)
 			continue
 		}
@@ -231,6 +244,7 @@ func (d *Detector) findEvilChanges(ct *commitTrees, withDiff bool) ([]models.Evi
 				new, _ := fileContent(ct.merge, path)
 				ec.Diff = computeDiff(old, new, "P1 "+ct.p1Hash, "M  "+ct.merge.Hash.String()[:7])
 			}
+			analyzeContent(ct.merge, path, &ec)
 			changes = append(changes, ec)
 			continue
 		}
@@ -247,6 +261,7 @@ func (d *Detector) findEvilChanges(ct *commitTrees, withDiff bool) ([]models.Evi
 				new, _ := fileContent(ct.merge, path)
 				ec.Diff = computeDiff(old, new, "P2 "+ct.p2Hash, "M  "+ct.merge.Hash.String()[:7])
 			}
+			analyzeContent(ct.merge, path, &ec)
 			changes = append(changes, ec)
 			continue
 		}
@@ -263,6 +278,7 @@ func (d *Detector) findEvilChanges(ct *commitTrees, withDiff bool) ([]models.Evi
 				new, _ := fileContent(ct.merge, path)
 				ec.Diff = computeDiff(old, new, "P1 "+ct.p1Hash, "M  "+ct.merge.Hash.String()[:7])
 			}
+			analyzeContent(ct.merge, path, &ec)
 			changes = append(changes, ec)
 		}
 	}
@@ -299,6 +315,53 @@ func (d *Detector) classifySeverity(path string, isNew bool) models.Severity {
 		return models.SeverityCritical
 	}
 	return models.SeverityWarning
+}
+
+// analyzeContent checks the merge commit's version of a file for binary data,
+// suspiciously long lines, and dangerous JS patterns. Updates ec in place.
+func analyzeContent(mergeTree *object.Tree, path string, ec *models.EvilChange) {
+	content, err := fileContent(mergeTree, path)
+	if err != nil || content == "" {
+		return
+	}
+
+	if isBinary(content) {
+		ec.Detail += "; binary file"
+		ec.Severity = models.SeverityCritical
+		return
+	}
+
+	var flags []string
+
+	for _, line := range strings.Split(content, "\n") {
+		if len(line) > longLineThreshold {
+			flags = append(flags, fmt.Sprintf("line of %d chars (possible horizontal obfuscation)", len(line)))
+			break
+		}
+	}
+
+	ext := strings.ToLower(filepath.Ext(path))
+	if jsExtensions[ext] {
+		if strings.Contains(content, "Function(") {
+			flags = append(flags, "Function() constructor")
+		}
+		if strings.Contains(content, "eval(") {
+			flags = append(flags, "eval()")
+		}
+	}
+
+	if len(flags) > 0 {
+		ec.Detail += "; suspicious: " + strings.Join(flags, ", ")
+		ec.Severity = models.SeverityCritical
+	}
+}
+
+func isBinary(content string) bool {
+	limit := 8000
+	if len(content) < limit {
+		limit = len(content)
+	}
+	return strings.ContainsRune(content[:limit], 0)
 }
 
 // treeFileHashes extracts a map of file path → blob hash from a tree.

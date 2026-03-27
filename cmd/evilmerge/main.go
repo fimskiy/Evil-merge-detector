@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/fimskiy/evil-merge-detector/internal/config"
 	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/fimskiy/evil-merge-detector/internal/reporter"
 	"github.com/fimskiy/evil-merge-detector/internal/scanner"
@@ -27,15 +29,23 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 	}
 
 	var (
-		scanBranch   string
-		scanSince    string
-		scanUntil    string
-		scanFormat   string
-		scanSeverity string
-		scanLimit    int
-		scanFailOn   string
-		scanCommit   string
-		scanTimeout  time.Duration
+		scanBranch     string
+		scanSince      string
+		scanUntil      string
+		scanSinceTag   string
+		scanUntilTag   string
+		scanFormat     string
+		scanSeverity   string
+		scanLimit      int
+		scanFailOn     string
+		scanCommit     string
+		scanTimeout    time.Duration
+		scanIgnoreBots bool
+		scanExclude    []string
+		scanInclude    []string
+		scanOutput     string
+		scanWorkers    int
+		scanVerbose    bool
 	)
 
 	var scanCmd = &cobra.Command{
@@ -49,6 +59,31 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				repoPath = args[0]
 			}
 
+			// Load project config and ignore list
+			cfg, err := config.Load(repoPath)
+			if err != nil {
+				return err
+			}
+			ig, err := config.LoadIgnore(repoPath)
+			if err != nil {
+				return err
+			}
+
+			// CLI flags override config file values
+			failOn := scanFailOn
+			if failOn == "" {
+				failOn = cfg.FailOn
+			}
+			ignoreBots := scanIgnoreBots || cfg.IgnoreBots
+
+			exclude := append(cfg.Exclude, scanExclude...)
+			include := append(cfg.Include, scanInclude...)
+
+			outputPath := scanOutput
+			if outputPath == "" {
+				outputPath = cfg.Output
+			}
+
 			// Build context: always respect Ctrl+C, optionally add timeout
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 			defer stop()
@@ -59,8 +94,19 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				defer cancel()
 			}
 
+			// Resolve output writer
+			var out io.Writer = os.Stdout
+			if outputPath != "" {
+				f, err := os.Create(outputPath)
+				if err != nil {
+					return fmt.Errorf("opening output file: %w", err)
+				}
+				defer f.Close()
+				out = f
+			}
+
 			// Print header (skip for machine-readable formats)
-			if scanFormat != "json" && scanFormat != "sarif" {
+			if scanFormat != "json" && scanFormat != "sarif" && out == os.Stdout {
 				if _, err := fmt.Fprintf(os.Stdout, "Evil Merge Detector %s\n", version); err != nil {
 					return err
 				}
@@ -74,14 +120,25 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				if err != nil {
 					return err
 				}
-				return reporter.PrintDetail(os.Stdout, report)
+				return reporter.PrintDetail(out, report)
 			}
 
 			opts := models.ScanOptions{
-				RepoPath:    repoPath,
-				Branch:      scanBranch,
-				Limit:       scanLimit,
-				MinSeverity: parseSeverity(scanSeverity),
+				RepoPath:       repoPath,
+				Branch:         scanBranch,
+				Limit:          scanLimit,
+				MinSeverity:    parseSeverity(scanSeverity),
+				SinceTag:       scanSinceTag,
+				UntilTag:       scanUntilTag,
+				IgnoreBots:     ignoreBots,
+				Exclude:        exclude,
+				Include:        include,
+				IgnoredHashes:  ig.Hashes,
+				IgnoredAuthors: ig.Authors,
+				Workers:        scanWorkers,
+			}
+			if scanVerbose {
+				opts.Progress = os.Stderr
 			}
 
 			if scanSince != "" {
@@ -100,7 +157,7 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				opts.Until = &t
 			}
 
-			failOnSeverity := parseSeverity(scanFailOn)
+			failOnSeverity := parseSeverity(failOn)
 
 			result, err := s.Scan(ctx, opts)
 			if err != nil {
@@ -117,12 +174,12 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				rep = reporter.NewText()
 			}
 
-			if err := rep.Report(os.Stdout, result); err != nil {
+			if err := rep.Report(out, result); err != nil {
 				return err
 			}
 
 			// Exit with non-zero code if evil merges found above threshold
-			if scanFailOn != "" {
+			if failOn != "" {
 				for _, r := range result.Reports {
 					if r.MaxSeverity >= failOnSeverity {
 						os.Exit(1)
@@ -137,12 +194,20 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 	scanCmd.Flags().StringVar(&scanBranch, "branch", "", "Branch to scan (default: current HEAD)")
 	scanCmd.Flags().StringVar(&scanSince, "since", "", "Scan commits after this date (YYYY-MM-DD)")
 	scanCmd.Flags().StringVar(&scanUntil, "until", "", "Scan commits before this date (YYYY-MM-DD)")
+	scanCmd.Flags().StringVar(&scanSinceTag, "since-tag", "", "Scan commits after this tag")
+	scanCmd.Flags().StringVar(&scanUntilTag, "until-tag", "", "Scan commits before this tag")
 	scanCmd.Flags().StringVar(&scanFormat, "format", "text", "Output format: text, json, sarif")
 	scanCmd.Flags().StringVar(&scanSeverity, "severity", "", "Minimum severity to report: info, warning, critical")
 	scanCmd.Flags().IntVar(&scanLimit, "limit", 0, "Maximum number of merge commits to analyze (0 = unlimited)")
 	scanCmd.Flags().StringVar(&scanFailOn, "fail-on", "", "Exit with code 1 if evil merges found at or above this severity")
 	scanCmd.Flags().StringVar(&scanCommit, "commit", "", "Inspect a specific merge commit in detail (by full or short hash)")
 	scanCmd.Flags().DurationVar(&scanTimeout, "timeout", 0, "Maximum scan duration, e.g. 30s, 5m (0 = unlimited)")
+	scanCmd.Flags().BoolVar(&scanIgnoreBots, "ignore-bots", false, "Skip merge commits authored by known bots (dependabot, renovate, etc.)")
+	scanCmd.Flags().StringArrayVar(&scanExclude, "exclude", nil, "Exclude findings in files matching this glob (repeatable)")
+	scanCmd.Flags().StringArrayVar(&scanInclude, "include", nil, "Only report findings in files matching this glob (repeatable)")
+	scanCmd.Flags().StringVar(&scanOutput, "output", "", "Write results to file instead of stdout")
+	scanCmd.Flags().IntVar(&scanWorkers, "workers", 1, "Number of parallel workers for merge analysis")
+	scanCmd.Flags().BoolVar(&scanVerbose, "verbose", false, "Print each analyzed commit to stderr")
 
 	var versionCmd = &cobra.Command{
 		Use:   "version",
