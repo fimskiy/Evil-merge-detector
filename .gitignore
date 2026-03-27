@@ -5,3 +5,8 @@ dist/
 *.out
 .DS_Store
 TODO.md
+FEATURES.md
+icon*.svg
+icon*.png
+icons-*.html
+icon-*.html
