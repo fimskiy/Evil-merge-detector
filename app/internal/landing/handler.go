@@ -20,8 +20,63 @@ var page = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Evil Merge Detector — Find hidden code in Git merge commits</title>
-<meta name="description" content="Automatically detect evil merges — merge commits that introduce changes not present in either parent branch. CLI, GitHub Action, and GitHub App.">
+<title>Detect Evil Merge Commits in Git — Evil Merge Detector</title>
+<meta name="description" content="Detect hidden code injected into Git merge commits. Evil Merge Detector scans your repo via CLI, GitHub Action, or GitHub App. Free for open source.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<link rel="canonical" href="https://evilmerge.dev/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Detect Evil Merge Commits in Git — Evil Merge Detector">
+<meta property="og:description" content="Detect hidden code injected into Git merge commits. Free CLI, GitHub Action, and GitHub App. Zero false positives.">
+<meta property="og:url" content="https://evilmerge.dev/">
+<meta property="og:site_name" content="Evil Merge Detector">
+<meta property="og:image" content="https://evilmerge.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Evil Merge Detector — terminal showing CRITICAL evil merge detected">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Detect Evil Merge Commits in Git — Evil Merge Detector">
+<meta name="twitter:description" content="Find merge commits that inject hidden code. CLI, GitHub Action, GitHub App. Free for open source.">
+<meta name="twitter:image" content="https://evilmerge.dev/og-image.png">
+<meta name="twitter:image:alt" content="Evil Merge Detector terminal output showing evil merge detection">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Evil Merge Detector",
+  "url": "https://evilmerge.dev/",
+  "description": "Detect evil merge commits — merge commits that introduce code changes not present in either parent branch. Available as CLI, GitHub Action, and GitHub App.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "offers": [
+    {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "name": "Free",
+      "description": "Public repositories, 50 PR scans per month"
+    },
+    {
+      "@type": "Offer",
+      "price": "7",
+      "priceCurrency": "USD",
+      "name": "Pro",
+      "description": "Public and private repositories, unlimited scans"
+    }
+  ],
+  "featureList": [
+    "Evil merge commit detection",
+    "Zero false positives",
+    "CLI tool",
+    "GitHub Action",
+    "GitHub App",
+    "SARIF output for GitHub Code Scanning",
+    "Works offline"
+  ],
+  "isAccessibleForFree": true,
+  "downloadUrl": "https://github.com/fimskiy/Evil-merge-detector",
+  "installUrl": "https://github.com/apps/evil-merge-detector"
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -842,7 +897,7 @@ footer {
 <!-- NAV -->
 <nav aria-label="Main navigation">
   <div class="nav-logo">
-    <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M256 24L444 88L444 264C444 364 354 446 256 482C158 446 68 364 68 264L68 88Z" fill="#da3633"/><path d="M256 62L418 118L418 264C418 348 338 418 256 450C174 418 94 348 94 264L94 118Z" fill="#b91c1c"/><line x1="256" y1="168" x2="182" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="256" y1="168" x2="330" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="182" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="330" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><circle cx="256" cy="168" r="28" fill="white"/><circle cx="182" cy="256" r="24" fill="white"/><circle cx="256" cy="364" r="26" fill="white"/><circle cx="330" cy="256" r="32" fill="#7f1d1d"/><line x1="313" y1="239" x2="347" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/><line x1="347" y1="239" x2="313" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/></svg>
+    <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logo-title"><title id="logo-title">Evil Merge Detector logo</title><path d="M256 24L444 88L444 264C444 364 354 446 256 482C158 446 68 364 68 264L68 88Z" fill="#da3633"/><path d="M256 62L418 118L418 264C418 348 338 418 256 450C174 418 94 348 94 264L94 118Z" fill="#b91c1c"/><line x1="256" y1="168" x2="182" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="256" y1="168" x2="330" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="182" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="330" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><circle cx="256" cy="168" r="28" fill="white"/><circle cx="182" cy="256" r="24" fill="white"/><circle cx="256" cy="364" r="26" fill="white"/><circle cx="330" cy="256" r="32" fill="#7f1d1d"/><line x1="313" y1="239" x2="347" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/><line x1="347" y1="239" x2="313" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/></svg>
     EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT
   </div>
   <div class="nav-links">
@@ -864,8 +919,8 @@ footer {
   </div>
 
   <h1>
-    The merge commit<br>
-    that <span class="threat">wasn't</span> reviewed<span class="cursor" aria-hidden="true"></span>
+    Detect <span class="threat">evil merge</span> commits<br>
+    before they ship<span class="cursor" aria-hidden="true"></span>
   </h1>
 
   <p class="hero-sub">
