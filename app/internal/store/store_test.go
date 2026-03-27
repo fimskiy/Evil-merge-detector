@@ -201,7 +201,7 @@ func TestSaveAndLastScan(t *testing.T) {
 	ctx := context.Background()
 
 	const instID = int64(8_000_007)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, instID) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, instID) })
 	if err := db.UpsertInstallation(ctx, store.Installation{
 		InstallationID: instID, AccountLogin: "u", AccountType: "User", Plan: "free",
 	}); err != nil {
@@ -251,7 +251,7 @@ func TestMonthlyScansCount(t *testing.T) {
 	ctx := context.Background()
 
 	const instID = int64(8_000_008)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, instID) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, instID) })
 	if err := db.UpsertInstallation(ctx, store.Installation{
 		InstallationID: instID, AccountLogin: "u2", AccountType: "User", Plan: "free",
 	}); err != nil {
@@ -280,7 +280,7 @@ func TestRecentScans(t *testing.T) {
 	ctx := context.Background()
 
 	const instID = int64(8_000_009)
-	t.Cleanup(func() { db.DeleteInstallation(ctx, instID) })
+	t.Cleanup(func() { _ = db.DeleteInstallation(ctx, instID) })
 	if err := db.UpsertInstallation(ctx, store.Installation{
 		InstallationID: instID, AccountLogin: "u3", AccountType: "User", Plan: "free",
 	}); err != nil {
