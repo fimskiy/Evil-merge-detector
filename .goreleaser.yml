@@ -25,6 +25,19 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+brews:
+  - name: evilmerge
+    repository:
+      owner: fimskiy
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://evilmerge.dev"
+    description: "Detect evil merges in Git repositories"
+    install: |
+      bin.install "evilmerge"
+    test: |
+      system "#{bin}/evilmerge", "version"
+
 changelog:
   sort: asc
   filters:
