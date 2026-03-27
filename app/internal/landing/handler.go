@@ -13,16 +13,16 @@ var ogImage []byte
 var tmpl = template.Must(template.New("landing").Parse(page))
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/og-image.png" {
-		w.Header().Set("Content-Type", "image/png")
-		w.Header().Set("Cache-Control", "public, max-age=86400")
-		w.Write(ogImage)
-		return
-	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := tmpl.Execute(w, nil); err != nil {
 		log.Printf("landing template: %v", err)
 	}
+}
+
+func OGImageHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.Write(ogImage)
 }
 
 var page = `<!DOCTYPE html>
