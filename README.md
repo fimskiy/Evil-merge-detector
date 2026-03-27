@@ -97,7 +97,7 @@ The easiest way to get started — install once and every pull request in your o
 - Automatic scan on every PR via GitHub Checks
 - Results appear directly in the pull request
 - Full history scan when you first install — catches past incidents
-- Scan history available at [evil-merge-detector.fly.dev/dashboard](https://evil-merge-detector.fly.dev/dashboard)
+- Scan history available at [evilmerge.dev/dashboard](https://evilmerge.dev/dashboard)
 - Slack / webhook notifications when evil merges are found
 
 **Plans:** Free (public repos, 50 scans/month) · Pro $7/month (private repos, unlimited scans, dashboard)
@@ -105,7 +105,7 @@ The easiest way to get started — install once and every pull request in your o
 **Status badge** — add to your README:
 
 ```markdown
-![Evil Merges](https://evil-merge-detector.fly.dev/badge/owner/repo)
+![Evil Merges](https://evilmerge.dev/badge/owner/repo)
 ```
 
 Shows `passing` (green) or `N found` (red) based on the latest scan result.

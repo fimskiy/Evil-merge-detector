@@ -53,7 +53,7 @@ func ScanPR(job PRJob) {
 			log.Printf("monthly scan count for %s/%s: %v", job.Owner, job.Repo, err)
 		} else if count >= 50 {
 			log.Printf("free plan limit reached for installation %d", job.InstallationID)
-			limitErr := fmt.Errorf("monthly scan limit reached (50/month on Free plan). Upgrade to Pro at https://evil-merge-detector.fly.dev/#pricing")
+			limitErr := fmt.Errorf("monthly scan limit reached (50/month on Free plan). Upgrade to Pro at https://evilmerge.dev/#pricing")
 			if err := ghclient.FailCheckRun(ctx, client, job.Owner, job.Repo, runID, limitErr); err != nil {
 				log.Printf("error failing check run: %v", err)
 			}
