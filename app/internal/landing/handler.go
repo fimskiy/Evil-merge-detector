@@ -1,14 +1,24 @@
 package landing
 
 import (
+	_ "embed"
 	"html/template"
 	"log"
 	"net/http"
 )
 
+//go:embed og-image.png
+var ogImage []byte
+
 var tmpl = template.Must(template.New("landing").Parse(page))
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/og-image.png" {
+		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		w.Write(ogImage)
+		return
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := tmpl.Execute(w, nil); err != nil {
 		log.Printf("landing template: %v", err)
