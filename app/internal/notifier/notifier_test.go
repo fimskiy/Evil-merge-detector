@@ -32,7 +32,9 @@ func TestNotify_Webhook_Payload(t *testing.T) {
 		if ct := r.Header.Get("Content-Type"); ct != "application/json" {
 			t.Errorf("Content-Type %q", ct)
 		}
-		json.NewDecoder(r.Body).Decode(&got)
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			t.Errorf("decode body: %v", err)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer srv.Close()
@@ -74,7 +76,9 @@ func TestNotify_Webhook_Payload(t *testing.T) {
 func TestNotify_Slack_Payload_PR(t *testing.T) {
 	var body map[string]any
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewDecoder(r.Body).Decode(&body)
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decode body: %v", err)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer srv.Close()
@@ -105,7 +109,9 @@ func TestNotify_Slack_Payload_PR(t *testing.T) {
 func TestNotify_Slack_Payload_History(t *testing.T) {
 	var body map[string]any
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewDecoder(r.Body).Decode(&body)
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decode body: %v", err)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer srv.Close()
@@ -170,14 +176,18 @@ func TestNotify_ServerError(t *testing.T) {
 func TestNotify_PRNumberOmittedWhenZero(t *testing.T) {
 	var raw map[string]any
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewDecoder(r.Body).Decode(&raw)
+		if err := json.NewDecoder(r.Body).Decode(&raw); err != nil {
+			t.Errorf("decode body: %v", err)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer srv.Close()
 
 	ev := notifier.EvilMergeEvent{Owner: "a", Repo: "b", PRNumber: 0, EvilMerges: 1}
 	n := notifier.New(srv.URL, "")
-	n.Notify(context.Background(), ev)
+	if err := n.Notify(context.Background(), ev); err != nil {
+		t.Fatal(err)
+	}
 
 	if _, ok := raw["pr_number"]; ok {
 		t.Error("pr_number should be omitted when zero (omitempty)")

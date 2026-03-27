@@ -282,7 +282,7 @@ func (s *Scanner) Scan(ctx context.Context, opts models.ScanOptions) (*models.Sc
 		if len(msg) > 60 {
 			msg = msg[:57] + "..."
 		}
-		fmt.Fprintf(opts.Progress, "[%d/%d] %s %s\n", n, total, c.Hash.String()[:7], msg)
+		_, _ = fmt.Fprintf(opts.Progress, "[%d/%d] %s %s\n", n, total, c.Hash.String()[:7], msg)
 	}
 
 	workers := opts.Workers
@@ -339,11 +339,12 @@ func (s *Scanner) Scan(ctx context.Context, opts models.ScanOptions) (*models.Sc
 		}
 
 		go func() {
+		loop:
 			for i, c := range merges {
 				select {
 				case jobs <- job{i, c}:
 				case <-ctx.Done():
-					break
+					break loop
 				}
 			}
 			close(jobs)

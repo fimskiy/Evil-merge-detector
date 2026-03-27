@@ -101,7 +101,7 @@ These "evil merges" bypass code review and can hide bugs or malicious code.`,
 				if err != nil {
 					return fmt.Errorf("opening output file: %w", err)
 				}
-				defer f.Close()
+				defer func() { _ = f.Close() }()
 				out = f
 			}
 
