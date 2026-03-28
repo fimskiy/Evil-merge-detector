@@ -32,7 +32,8 @@ var page = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Detect Evil Merge Commits in Git — Evil Merge Detector</title>
 <meta name="description" content="Detect code injection via Git merge commits — a supply chain attack vector invisible to standard git security tools. CLI, GitHub Action, and GitHub App. Free for open source.">
-<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
 <link rel="canonical" href="https://evilmerge.dev/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Detect Evil Merge Commits in Git — Evil Merge Detector">
@@ -90,28 +91,31 @@ var page = `<!DOCTYPE html>
   "installUrl": "https://github.com/apps/evil-merge-detector"
 }
 </script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16 2L28 6L28 18C28 24 22 29 16 31C10 29 4 24 4 18L4 6Z' fill='%23dc2626'/%3E%3Cpath d='M16 5L26 8.5L26 18C26 23 21 27 16 29C11 27 6 23 6 18L6 8.5Z' fill='%23b91c1c'/%3E%3Ccircle cx='16' cy='12' r='2.5' fill='white'/%3E%3Ccircle cx='11' cy='17' r='2' fill='white'/%3E%3Ccircle cx='16' cy='22' r='2.2' fill='white'/%3E%3Ccircle cx='21' cy='17' r='2.5' fill='%237f1d1d'/%3E%3Cline x1='20' y1='16' x2='22' y2='18' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='22' y1='16' x2='20' y2='18' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #07090d;
-  --bg2: #0d1117;
-  --bg3: #111820;
-  --border: rgba(255,255,255,0.07);
-  --border-bright: rgba(255,255,255,0.12);
-  --red: #e63946;
-  --red-dim: rgba(230,57,70,0.12);
-  --red-glow: rgba(230,57,70,0.25);
-  --green: #2dce89;
-  --amber: #f4a261;
-  --text: #c9d1d9;
-  --text-dim: #737d88;
-  --text-mid: #8b949e;
-  --mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --bg: #ffffff;
+  --bg-soft: #f8fafc;
+  --bg-code: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --red: #dc2626;
+  --red-soft: #fef2f2;
+  --red-border: #fecaca;
+  --text: #0f172a;
+  --text-mid: #334155;
+  --text-muted: #64748b;
+  --green: #16a34a;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --radius: 8px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -127,33 +131,15 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 a { color: inherit; text-decoration: none; }
-code { font-family: var(--mono); }
 
 :focus-visible {
   outline: 2px solid var(--red);
   outline-offset: 3px;
   border-radius: 3px;
-}
-
-/* GRID BACKGROUND */
-.grid-bg {
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
-}
-.grid-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(230,57,70,0.06) 0%, transparent 70%);
 }
 
 /* NAV */
@@ -166,29 +152,31 @@ nav {
   justify-content: space-between;
   padding: 0 48px;
   height: 60px;
-  background: rgba(7,9,13,0.85);
+  background: rgba(255,255,255,0.9);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
 
 .nav-logo {
-  font-family: var(--mono);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: -0.01em;
   color: var(--text);
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.nav-logo svg { width: 26px; height: 26px; flex-shrink: 0; }
+.nav-logo svg { width: 32px; height: 32px; flex-shrink: 0; }
+.nav-logo .brand-name { color: var(--text); }
 .nav-logo .accent { color: var(--red); }
 
 .nav-links {
   display: flex;
   gap: 32px;
-  font-size: 15px;
-  color: var(--text-mid);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 .nav-links a { transition: color 0.15s; }
 .nav-links a:hover { color: var(--text); }
@@ -196,39 +184,60 @@ nav {
 .nav-cta {
   font-size: 13px;
   font-weight: 600;
-  font-family: var(--mono);
-  letter-spacing: 0.04em;
   padding: 8px 18px;
   background: var(--red);
   color: #fff;
-  border-radius: 4px;
-  transition: opacity 0.15s, box-shadow 0.15s, transform 0.15s var(--ease-out);
+  border-radius: 6px;
+  transition: background 0.15s, transform 0.15s var(--ease);
 }
 .nav-cta:hover {
-  opacity: 0.88;
-  box-shadow: 0 0 20px var(--red-glow);
+  background: #b91c1c;
   transform: translateY(-1px);
 }
 
-/* HERO ENTRANCE ANIMATIONS */
+/* ANIMATIONS */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.hero-eyebrow { animation: fadeUp 0.5s var(--ease-out) 0.05s both; }
-.hero h1      { animation: fadeUp 0.55s var(--ease-out) 0.15s both; }
-.hero-sub     { animation: fadeUp 0.55s var(--ease-out) 0.25s both; }
-.hero-actions { animation: fadeUp 0.5s var(--ease-out) 0.35s both; }
-.terminal     { animation: fadeUp 0.6s var(--ease-out) 0.45s both; }
+/* Aurora blob animations */
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -20px) scale(1.05); }
+  66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+/* Terminal entrance animation */
+@keyframes terminalEntrance {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.hero-eyebrow { animation: fadeUp 0.45s var(--ease) 0.05s both; }
+.hero h1      { animation: fadeUp 0.5s var(--ease) 0.15s both; }
+.hero-sub     { animation: fadeUp 0.5s var(--ease) 0.25s both; }
+.hero-actions { animation: fadeUp 0.45s var(--ease) 0.32s both; }
 
 /* HERO */
+.hero-wrap {
+  position: relative;
+  background:
+    radial-gradient(ellipse 55% 60% at 90% 10%, rgba(220,38,38,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 55% at 10% 90%, rgba(99,102,241,0.15) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(220,38,38,0.05) 0%, transparent 70%),
+    #ffffff;
+}
+
+.blob-1 { display: none; }
+.blob-2 { display: none; }
+
 .hero {
   position: relative;
   z-index: 1;
   max-width: 860px;
   margin: 0 auto;
-  padding: 110px 24px 90px;
+  padding: 100px 24px 80px;
   text-align: center;
 }
 
@@ -236,165 +245,167 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #c9d1d9;
-  background: rgba(230,57,70,0.1);
-  border: 1px solid rgba(230,57,70,0.35);
-  padding: 6px 16px;
-  border-radius: 2px;
-  margin-bottom: 36px;
+  color: var(--red);
+  background: var(--red-soft);
+  border: 1px solid var(--red-border);
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 32px;
 }
 .hero-eyebrow .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--red);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--red-glow); }
-  50%       { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
 }
 
 h1 {
-  font-family: var(--mono);
-  font-size: clamp(2rem, 5vw + 0.5rem, 3.375rem);
+  font-size: clamp(2.25rem, 5vw + 0.5rem, 3.5rem);
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-  color: #e6edf3;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 20px;
 }
-h1 .threat {
-  background: linear-gradient(135deg, #e63946 0%, #ff7070 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-h1 .cursor {
+h1 .threat { color: var(--red); }
+.cursor {
   display: inline-block;
   width: 3px;
   height: 0.85em;
   background: var(--red);
-  vertical-align: middle;
   margin-left: 4px;
-  animation: blink 1.1s step-end infinite;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
 }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 
 .hero-sub {
   font-size: 18px;
-  color: var(--text-mid);
+  color: var(--text-muted);
   max-width: 520px;
-  margin: 0 auto 40px;
+  margin: 0 auto 36px;
   line-height: 1.7;
+  font-weight: 400;
 }
 
 .hero-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  margin-bottom: 64px;
+  margin-bottom: 56px;
 }
 
+.cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.cta-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Primary button with animated gradient */
 .btn-primary {
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 12px 28px;
-  background: var(--red);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 24px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #fff;
-  border-radius: 4px;
-  transition: opacity 0.15s, box-shadow 0.2s, transform 0.15s var(--ease-out);
+  border-radius: 7px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(220,38,38,0.25);
 }
 .btn-primary:hover {
-  opacity: 0.9;
-  box-shadow: 0 0 30px var(--red-glow);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 8px 24px rgba(220,38,38,0.35);
   transform: translateY(-2px);
 }
 .btn-primary:active { transform: translateY(0); }
 
 .btn-secondary {
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 12px 28px;
-  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 24px;
+  background: var(--bg);
   color: var(--text-mid);
-  border: 1px solid var(--border-bright);
-  border-radius: 4px;
-  transition: color 0.15s, border-color 0.15s, transform 0.15s var(--ease-out);
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s var(--ease);
 }
 .btn-secondary:hover {
+  border-color: #94a3b8;
   color: var(--text);
-  border-color: rgba(255,255,255,0.25);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 .btn-secondary:active { transform: translateY(0); }
 
 /* TERMINAL */
 .terminal {
-  background: var(--bg2);
-  border: 1px solid var(--border-bright);
-  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   overflow: hidden;
-  max-width: 620px;
+  max-width: 600px;
   margin: 0 auto;
   text-align: left;
-  box-shadow:
-    0 24px 80px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(255,255,255,0.04),
-    0 0 60px rgba(230,57,70,0.04);
+  box-shadow: var(--shadow-lg);
+  animation: terminalEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
 }
 .terminal-bar {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
-  background: rgba(255,255,255,0.03);
+  padding: 10px 14px;
+  background: #f1f5f9;
   border-bottom: 1px solid var(--border);
 }
-.dot-r { width:10px;height:10px;border-radius:50%;background:#ff5f57; }
-.dot-y { width:10px;height:10px;border-radius:50%;background:#ffbd2e; }
-.dot-g { width:10px;height:10px;border-radius:50%;background:#28c840; }
+.dot-r { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+.dot-y { width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e; }
+.dot-g { width: 10px; height: 10px; border-radius: 50%; background: #28c840; }
 .terminal-title {
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--text-dim);
-  margin-left: auto;
-  margin-right: auto;
+  color: var(--text-muted);
+  margin: 0 auto;
 }
 .terminal-body {
   padding: 20px 24px;
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 13.5px;
   line-height: 1.9;
+  color: var(--text-mid);
+  min-height: 210px;
 }
-.t-dim    { color: var(--text-dim); }
-.t-prompt { color: var(--text-mid); }
-.t-cmd    { color: #79c0ff; }
-.t-bad    { color: var(--red); font-weight: 700; }
-.t-warn   { color: var(--amber); }
+.t-dim    { color: var(--text-muted); }
+.t-prompt { color: var(--text-muted); }
+.t-cmd    { color: #2563eb; }
+.t-bad    { color: var(--red); font-weight: 600; }
 .t-ok     { color: var(--green); }
+.t-cursor {
+  display: inline-block;
+  color: var(--text-muted);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
 /* STATS BAR */
 .stats-bar {
-  position: relative;
-  z-index: 1;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 24px;
-  background: rgba(255,255,255,0.012);
+  padding: 28px 24px;
+  background: var(--bg-soft);
 }
 .stats-inner {
   max-width: 800px;
@@ -407,81 +418,78 @@ h1 .cursor {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 44px;
+  padding: 0 48px;
   flex: 1;
   max-width: 200px;
 }
 .stat + .stat { border-left: 1px solid var(--border); }
 .stat-val {
-  font-family: var(--mono);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  color: #e6edf3;
   letter-spacing: -0.02em;
+  color: var(--text);
   line-height: 1.2;
 }
 .stat-val .accent { color: var(--red); }
+
+/* "0" false positives highlight */
+.stat-val.zero {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #15803d;
+  letter-spacing: -0.03em;
+}
+
 .stat-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
   margin-top: 4px;
   white-space: nowrap;
 }
 
 /* SECTIONS */
 section {
-  position: relative;
-  z-index: 1;
   padding: 96px 24px;
 }
-
 .section-inner { max-width: 1000px; margin: 0 auto; }
 
+/* Section label pills */
 .label {
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--red);
-  margin-bottom: 16px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-}
-.label::before {
-  content: '';
-  display: block;
-  width: 20px;
-  height: 1px;
-  background: var(--red);
+  gap: 6px;
+  background: rgba(220,38,38,0.08);
+  border: 1px solid rgba(220,38,38,0.2);
+  color: var(--red);
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
 }
 
 h2 {
-  font-family: var(--mono);
-  font-size: clamp(1.375rem, 2vw + 0.5rem, 1.875rem);
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2rem);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-  color: #e6edf3;
+  letter-spacing: -0.02em;
+  color: var(--text);
   margin-bottom: 12px;
   line-height: 1.2;
 }
 
 .section-sub {
   font-size: 17px;
-  color: var(--text-mid);
+  color: var(--text-muted);
   max-width: 500px;
-  margin-bottom: 52px;
+  margin-bottom: 48px;
   line-height: 1.7;
 }
 
 /* DIVIDER */
 .divider {
-  position: relative;
-  z-index: 1;
   height: 1px;
   background: var(--border);
   margin: 0 48px;
@@ -496,128 +504,128 @@ h2 {
 }
 
 .problem-text p {
-  font-size: 16px;
+  font-size: 15.5px;
   color: var(--text-mid);
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   line-height: 1.75;
 }
-.problem-text p strong { color: var(--text); }
+.problem-text p strong { color: var(--text); font-weight: 600; }
 .problem-text code {
-  background: rgba(255,255,255,0.07);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
   padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 12px;
+  border-radius: 4px;
+  color: var(--text-mid);
 }
 
 .diff-card {
-  background: var(--bg2);
-  border: 1px solid var(--border-bright);
-  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.04),
+    0 8px 16px rgba(0,0,0,0.04);
+  transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.diff-card:hover {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 16px rgba(0,0,0,0.08),
+    0 16px 32px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
 }
 .diff-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: rgba(255,255,255,0.03);
+  background: var(--bg-soft);
   border-bottom: 1px solid var(--border);
 }
 .diff-filename {
   font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text-mid);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 .diff-badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 2px 8px;
-  background: var(--red-dim);
+  background: var(--red-soft);
   color: var(--red);
-  border: 1px solid rgba(230,57,70,0.3);
-  border-radius: 2px;
+  border: 1px solid var(--red-border);
+  border-radius: 4px;
 }
 .diff-body {
   padding: 20px;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 2;
 }
-.diff-line { display: flex; gap: 12px; }
-.diff-label { color: var(--text-mid); min-width: 70px; flex-shrink: 0; }
+.diff-line { display: flex; gap: 14px; }
+.diff-label { color: var(--text-muted); min-width: 70px; flex-shrink: 0; font-size: 12px; }
 .diff-value { color: var(--text-mid); }
 .diff-value.clean { color: var(--green); }
-.diff-value.bad   { color: var(--red); font-weight: 700; }
+.diff-value.bad   { color: var(--red); font-weight: 600; }
 .diff-sep { height: 1px; background: var(--border); margin: 14px 0; }
 .diff-note {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.7;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.65;
   font-style: italic;
+  font-family: var(--sans);
 }
 
 /* HOW IT WORKS */
 .steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
+  gap: 16px;
 }
 .step {
-  background: var(--bg2);
-  padding: 36px 32px;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.2s;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.04),
+    0 8px 16px rgba(0,0,0,0.04);
+  transition: box-shadow 0.25s var(--ease), border-color 0.25s, transform 0.25s var(--ease);
 }
-.step:hover { background: var(--bg3); }
-.step::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--red);
-  opacity: 0;
-  transition: opacity 0.25s var(--ease-out);
+.step:hover {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 16px rgba(0,0,0,0.08),
+    0 16px 32px rgba(0,0,0,0.08);
+  border-color: var(--border-strong);
+  transform: translateY(-4px);
 }
-.step:hover::before { opacity: 1; }
 .step-num {
-  font-family: var(--mono);
-  font-size: 72px;
+  font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.04);
-  position: absolute;
-  top: -8px; right: 16px;
-  line-height: 1;
-  user-select: none;
-}
-.step-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--red);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
 }
 .step h3 {
-  font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: #e6edf3;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
   margin-bottom: 10px;
+  letter-spacing: -0.01em;
 }
 .step p {
-  font-size: 15px;
-  color: var(--text-mid);
-  line-height: 1.7;
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.65;
 }
 
 /* INTEGRATIONS */
@@ -627,145 +635,215 @@ h2 {
   gap: 16px;
 }
 .integration {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 28px;
-  transition: border-color 0.2s, transform 0.2s var(--ease-out), box-shadow 0.2s;
-}
-.integration:hover {
-  border-color: var(--border-bright);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-}
-.int-icon {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-mid);
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 2px;
-  margin-bottom: 16px;
-}
-.integration h3 {
-  font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-.integration p {
-  font-size: 15px;
-  color: var(--text-mid);
-  margin-bottom: 20px;
-  line-height: 1.65;
-}
-.integration pre {
   background: var(--bg);
   border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.04),
+    0 8px 16px rgba(0,0,0,0.04);
+  transition: box-shadow 0.25s var(--ease), border-color 0.25s, transform 0.25s var(--ease);
+}
+.integration:hover {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 16px rgba(0,0,0,0.08),
+    0 16px 32px rgba(0,0,0,0.08);
+  border-color: var(--border-strong);
+  transform: translateY(-4px);
+}
+.int-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
   border-radius: 4px;
-  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+}
+.integration .int-badge.cli    { background: #f0fdf4; border: 1px solid #86efac; color: #16a34a; }
+.integration .int-badge.action { background: #f5f3ff; border: 1px solid #c4b5fd; color: #7c3aed; }
+.integration .int-badge.app    { background: #eff6ff; border: 1px solid #93c5fd; color: #2563eb; }
+.integration:has(.cli):hover   { border-color: #86efac; }
+.integration:has(.action):hover { border-color: #c4b5fd; }
+.integration:has(.app):hover   { border-color: #93c5fd; }
+.integration h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.integration p {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+.integration pre {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #dc2626;
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
   font-family: var(--mono);
   font-size: 13px;
-  color: #79c0ff;
+  line-height: 1.7;
+  color: #1e293b;
   overflow-x: auto;
-  line-height: 1.8;
 }
+
+/* PRICING TOGGLE */
+.pricing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--border-strong);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+  outline: none;
+  flex-shrink: 0;
+}
+.toggle-switch.annual { background: var(--red); }
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch.annual .toggle-knob { transform: translateX(20px); }
+.save-badge {
+  font-size: 11px;
+  font-weight: 600;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #16a34a;
+  padding: 2px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.04em;
+}
+.toggle-label { transition: color 0.15s; }
+.toggle-label.active { color: var(--text); }
 
 /* PRICING */
 .pricing-wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  max-width: 700px;
+  max-width: 680px;
   margin: 0 auto;
+  padding-top: 20px;
 }
-
 .plan {
-  background: var(--bg2);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 36px;
-  position: relative;
+  border-radius: var(--radius);
+  padding: 32px;
   display: flex;
   flex-direction: column;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.04),
+    0 8px 16px rgba(0,0,0,0.04);
 }
-.plan .plan-btn { margin-top: auto; }
 
+/* Pro card — elevated and glowing */
 .plan.featured {
-  border-color: rgba(230,57,70,0.4);
-  background: linear-gradient(135deg, rgba(230,57,70,0.05) 0%, var(--bg2) 60%);
+  border: 2px solid #dc2626;
+  background: #fffafa;
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    0 4px 8px rgba(220,38,38,0.1),
+    0 12px 24px rgba(220,38,38,0.12),
+    0 24px 48px rgba(220,38,38,0.08);
 }
 .plan.featured::before {
-  content: 'RECOMMENDED';
+  content: 'MOST POPULAR';
   position: absolute;
-  top: -1px; right: 24px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  padding: 4px 10px;
-  background: var(--red);
-  color: #fff;
-  border-radius: 0 0 4px 4px;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 14px;
+  border-radius: 99px;
+  white-space: nowrap;
 }
 
 .plan-tier {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-mid);
-  margin-bottom: 16px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
 }
-
 .plan-price {
-  margin-bottom: 6px;
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 3px;
+  margin-bottom: 6px;
 }
 .price-currency {
-  font-family: var(--mono);
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--text-mid);
-  font-weight: 700;
 }
 .price-amount {
-  font-family: var(--mono);
   font-size: 48px;
   font-weight: 700;
-  color: #e6edf3;
+  letter-spacing: -0.03em;
+  color: var(--text);
   line-height: 1;
 }
 .price-period {
-  font-family: var(--mono);
   font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text-muted);
 }
-
 .plan-desc {
-  font-size: 15px;
-  color: var(--text-dim);
-  margin-bottom: 28px;
-  padding-bottom: 28px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--border);
 }
-
 .plan ul {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 32px;
+  gap: 11px;
+  margin-bottom: 28px;
+  flex: 1;
 }
 .plan li {
-  font-size: 15px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -774,103 +852,224 @@ h2 {
 .plan li .check {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
-  background: rgba(45,206,137,0.12);
-  border: 1px solid rgba(45,206,137,0.3);
+  border-radius: 50%;
+  background: #dcfce7;
+  border: 1px solid #86efac;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--green);
+  font-weight: 700;
 }
 .plan li.no .check {
-  background: rgba(255,255,255,0.04);
+  background: var(--bg-soft);
   border-color: var(--border);
-  color: var(--text-dim);
+  color: var(--text-muted);
 }
-.plan li.no { color: var(--text-dim); }
+.plan li.no { color: var(--text-muted); }
 
 .plan-btn {
   display: block;
   text-align: center;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 12px;
-  border-radius: 4px;
-  border: 1px solid var(--border-bright);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 20px;
+  border-radius: 7px;
+  border: 1px solid var(--border-strong);
   color: var(--text-mid);
-  transition: color 0.15s, border-color 0.15s, transform 0.15s var(--ease-out);
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s var(--ease);
 }
 .plan-btn:hover {
+  border-color: #94a3b8;
   color: var(--text);
-  border-color: rgba(255,255,255,0.25);
   transform: translateY(-1px);
 }
 .plan.featured .plan-btn {
-  background: var(--red);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border-color: var(--red);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .plan.featured .plan-btn:hover {
-  opacity: 0.88;
-  box-shadow: 0 0 24px var(--red-glow);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #ef4444;
+  box-shadow: 0 8px 24px rgba(220,38,38,0.35);
+  transform: translateY(-2px);
+}
+
+.plan-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 10px;
 }
 
 /* BOTTOM CTA */
 .cta-section {
   text-align: center;
-  background: radial-gradient(ellipse 70% 100% at 50% 50%, rgba(230,57,70,0.07) 0%, transparent 70%);
+  background: var(--bg-soft);
   border-top: 1px solid var(--border);
 }
 .cta-section h2 {
-  max-width: 600px;
-  margin: 0 auto 16px;
+  max-width: 560px;
+  margin: 0 auto 14px;
 }
 .cta-section .section-sub {
-  margin: 0 auto 36px;
+  margin: 0 auto 32px;
 }
-.cta-section .label {
-  justify-content: center;
-}
-.cta-section .label::before { display: none; }
 .cta-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 /* FOOTER */
 footer {
-  position: relative;
-  z-index: 1;
-  padding: 36px 48px;
+  padding: 32px 48px;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--bg);
 }
 .footer-logo {
-  font-family: var(--mono);
   font-size: 13px;
-  color: var(--text-mid);
+  font-weight: 500;
+  color: var(--text-muted);
 }
 .footer-logo .accent { color: var(--red); }
 .footer-links {
   display: flex;
   gap: 28px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-mid);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 .footer-links a { transition: color 0.15s; }
 .footer-links a:hover { color: var(--text); }
-.footer-gh-link { color: #58a6ff; }
-.footer-gh-link:hover { color: #79bcff; }
+.footer-gh-link { color: #2563eb; }
+.footer-gh-link:hover { color: #1d4ed8; }
+
+/* Link arrow micro-interaction */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.2s ease;
+}
+.link-arrow::after {
+  content: '\2192';
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.link-arrow:hover {
+  gap: 10px;
+}
+.link-arrow:hover::after {
+  transform: translateX(3px);
+}
+
+/* Scroll-triggered reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal:nth-child(3) { transition-delay: 0.2s; }
+.reveal:nth-child(4) { transition-delay: 0.3s; }
+
+/* FAQ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+.faq-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.faq-item[open] {
+  border-color: var(--border-strong);
+}
+.faq-item + .faq-item { border-top: none; border-radius: 0; }
+.faq-item:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.faq-item:last-child  { border-radius: 0 0 var(--radius) var(--radius); }
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  gap: 16px;
+}
+.faq-q::-webkit-details-marker { display: none; }
+.faq-q::after {
+  content: '+';
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.2s var(--ease);
+}
+.faq-item[open] .faq-q::after {
+  transform: rotate(45deg);
+}
+.faq-a {
+  padding: 0 20px 18px;
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* Mobile nav toggle */
+.nav-menu-btn {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text-mid);
+  font-size: 18px;
+  line-height: 1;
+}
+.mobile-nav {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+}
+.mobile-nav a {
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-mid);
+  border-bottom: 1px solid var(--border);
+  transition: color 0.15s, background 0.15s;
+}
+.mobile-nav a:last-child { border-bottom: none; }
+.mobile-nav a:hover { color: var(--text); background: var(--bg-soft); }
+.mobile-nav.open { display: flex; }
 
 /* REDUCED MOTION */
 @media (prefers-reduced-motion: reduce) {
@@ -879,39 +1078,104 @@ footer {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  .reveal { opacity: 1; transform: none; transition: none; }
 }
 
-/* RESPONSIVE */
+/* TABLET (1024px) — 3-col → 2-col */
+@media (max-width: 1024px) {
+  .steps,
+  .integrations { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* MOBILE (768px) */
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
-  .hero { padding: 72px 20px 60px; }
-  .terminal-body { font-size: 13px; padding: 16px 18px; }
+  .nav-menu-btn { display: block; }
+
+  .hero { padding: 56px 20px 48px; }
+  .hero h1 { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+  .hero-sub { font-size: 16px; }
+  .hero-actions { flex-direction: column; align-items: center; }
+  .btn-primary, .btn-secondary { width: 100%; max-width: 320px; text-align: center; justify-content: center; }
+
+  .terminal { max-width: 100%; }
+  .terminal-body { font-size: 12px; padding: 14px 16px; }
+  .terminal-body pre, .integration pre { overflow-x: auto; white-space: pre; }
+
   .stats-inner { flex-wrap: wrap; }
   .stat { min-width: 50%; padding: 20px 0; border-left: none !important; }
   .stat:nth-child(even) { border-left: 1px solid var(--border) !important; }
   .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+
   .problem-grid,
   .steps,
   .integrations,
   .pricing-wrap { grid-template-columns: 1fr; }
-  .steps { gap: 1px; }
-  section { padding: 64px 20px; }
+
+  .integration pre { overflow-x: auto; font-size: 12px; }
+
+  .pricing-toggle { flex-wrap: wrap; gap: 8px; }
+  .plan.featured { transform: none; }
+  .plan.featured::before { font-size: 10px; }
+
+  section { padding: 56px 20px; }
+  .section-sub { font-size: 15px; }
   .divider { margin: 0 20px; }
-  footer { flex-direction: column; gap: 20px; text-align: center; padding: 32px 20px; }
-  .footer-links { justify-content: center; }
+
+  footer { flex-direction: column; gap: 16px; text-align: center; padding: 28px 20px; }
+  .footer-links { justify-content: center; flex-wrap: wrap; gap: 16px; }
 }
+
+/* SMALL PHONES (390px) */
+@media (max-width: 390px) {
+  .hero h1 { font-size: 1.65rem; }
+  .stat-val.zero { font-size: 1.75rem; }
+  .price-amount { font-size: 36px; }
+  nav { padding: 0 16px; }
+  section { padding: 48px 16px; }
+}
+#coming-soon {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#coming-soon .terminal {
+  animation: terminalEntrance 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  max-width: 360px;
+  width: 100%;
+}
+#coming-soon .terminal-body { min-height: auto; }
 </style>
 </head>
 <body>
-
-<div class="grid-bg" aria-hidden="true"></div>
+<div id="coming-soon" aria-live="polite">
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="dot-r" aria-hidden="true"></span>
+      <span class="dot-y" aria-hidden="true"></span>
+      <span class="dot-g" aria-hidden="true"></span>
+      <span class="terminal-title">evilmerge &mdash; announce</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-dim"># Something important is coming</div>
+      <div><span class="t-prompt">$ </span><span class="t-cursor">▋</span></div>
+    </div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav aria-label="Main navigation">
   <div class="nav-logo">
-    <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logo-title"><title id="logo-title">Evil Merge Detector logo</title><path d="M256 24L444 88L444 264C444 364 354 446 256 482C158 446 68 364 68 264L68 88Z" fill="#da3633"/><path d="M256 62L418 118L418 264C418 348 338 418 256 450C174 418 94 348 94 264L94 118Z" fill="#b91c1c"/><line x1="256" y1="168" x2="182" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="256" y1="168" x2="330" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="182" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="330" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><circle cx="256" cy="168" r="28" fill="white"/><circle cx="182" cy="256" r="24" fill="white"/><circle cx="256" cy="364" r="26" fill="white"/><circle cx="330" cy="256" r="32" fill="#7f1d1d"/><line x1="313" y1="239" x2="347" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/><line x1="347" y1="239" x2="313" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/></svg>
-    EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT
+    <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logo-title-v2"><title id="logo-title-v2">Evil Merge Detector logo</title><path d="M256 24L444 88L444 264C444 364 354 446 256 482C158 446 68 364 68 264L68 88Z" fill="#da3633"/><path d="M256 62L418 118L418 264C418 348 338 418 256 450C174 418 94 348 94 264L94 118Z" fill="#b91c1c"/><line x1="256" y1="168" x2="182" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="256" y1="168" x2="330" y2="256" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="182" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><line x1="330" y1="256" x2="256" y2="364" stroke="white" stroke-width="26" stroke-linecap="round"/><circle cx="256" cy="168" r="28" fill="white"/><circle cx="182" cy="256" r="24" fill="white"/><circle cx="256" cy="364" r="26" fill="white"/><circle cx="330" cy="256" r="32" fill="#7f1d1d"/><line x1="313" y1="239" x2="347" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/><line x1="347" y1="239" x2="313" y2="273" stroke="white" stroke-width="12" stroke-linecap="round"/></svg>
+    <span class="brand-name">Evil Merge <span class="accent">Detector</span></span>
   </div>
   <div class="nav-links">
     <a href="#how-it-works">How it works</a>
@@ -919,49 +1183,64 @@ footer {
     <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
   </div>
   <a class="nav-cta" href="https://github.com/apps/evil-merge-detector">Install App</a>
+  <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false">&#9776;</button>
 </nav>
+<div class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <a href="#how-it-works">How it works</a>
+  <a href="#pricing">Pricing</a>
+  <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
+  <a href="https://github.com/apps/evil-merge-detector">Install App</a>
+</div>
 
-<!-- MAIN CONTENT -->
 <main>
 
 <!-- HERO -->
-<div class="hero">
-  <div class="hero-eyebrow">
-    <span class="dot" aria-hidden="true"></span>
-    Coming soon to GitHub Marketplace
-  </div>
+<div class="hero-wrap">
+  <div class="blob-1" aria-hidden="true"></div>
+  <div class="blob-2" aria-hidden="true"></div>
 
-  <h1>
-    Detect <span class="threat">evil merge</span> commits<br>
-    before they ship<span class="cursor" aria-hidden="true"></span>
-  </h1>
-
-  <p class="hero-sub">
-    Evil Merge Detector finds merge commits that introduce changes not present in either parent branch &mdash;
-    the attack vector your code review misses.
-  </p>
-
-  <div class="hero-actions">
-    <a class="btn-primary" href="https://github.com/apps/evil-merge-detector">Install GitHub App</a>
-    <a class="btn-secondary" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
-  </div>
-
-  <div class="terminal">
-    <div class="terminal-bar">
-      <span class="dot-r" aria-hidden="true"></span>
-      <span class="dot-y" aria-hidden="true"></span>
-      <span class="dot-g" aria-hidden="true"></span>
-      <span class="terminal-title">evilmerge &mdash; scan</span>
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <span class="dot" aria-hidden="true"></span>
+      Open source · CLI + GitHub Action + GitHub App
     </div>
-    <div class="terminal-body">
-      <div class="t-dim"># Scan your repository</div>
-      <div><span class="t-prompt">$ </span><span class="t-cmd">evilmerge scan .</span></div>
-      <div>&nbsp;</div>
-      <div class="t-bad">CRITICAL  ab90bd7  vite.config.js</div>
-      <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Both parents had identical content.</div>
-      <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Merge result differs &mdash; manual edit detected.</div>
-      <div>&nbsp;</div>
-      <div class="t-ok">&#10003;  23 merge commits checked &nbsp;|&nbsp; 1 critical issue found</div>
+
+    <h1>
+      Detect <span class="threat">evil merge</span> commits<br>before they ship<span class="cursor"></span>
+    </h1>
+
+    <p class="hero-sub">
+      Evil Merge Detector finds merge commits that introduce changes not present in either parent branch &mdash;
+      the attack vector your code review misses.
+    </p>
+
+    <div class="hero-actions">
+      <div class="cta-group">
+        <a class="btn-primary" href="https://github.com/apps/evil-merge-detector">Start Scanning — Free</a>
+        <span class="cta-note">No credit card required</span>
+      </div>
+      <a class="btn-secondary link-arrow" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="dot-r" aria-hidden="true"></span>
+        <span class="dot-y" aria-hidden="true"></span>
+        <span class="dot-g" aria-hidden="true"></span>
+        <span class="terminal-title">evilmerge &mdash; scan</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-dim"># Scan your repository</div>
+        <div><span class="t-prompt">$ </span><span class="t-cmd" id="typed-cmd"></span><span class="t-cursor">▋</span></div>
+        <div id="term-output" style="display:none">
+          <div>&nbsp;</div>
+          <div class="t-bad">CRITICAL  ab90bd7  vite.config.js</div>
+          <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Both parents had identical content.</div>
+          <div class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Merge result differs &mdash; manual edit detected.</div>
+          <div>&nbsp;</div>
+          <div class="t-ok">&#10003;  23 merge commits checked &nbsp;|&nbsp; 1 critical issue found</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -970,11 +1249,11 @@ footer {
 <div class="stats-bar">
   <div class="stats-inner">
     <div class="stat">
-      <span class="stat-val"><span class="accent">0</span></span>
+      <span class="stat-val zero" data-target="0" data-prefix="" data-suffix="">0</span>
       <span class="stat-label">False positives</span>
     </div>
     <div class="stat">
-      <span class="stat-val">3</span>
+      <span class="stat-val" data-target="5" data-prefix="" data-suffix="">0</span>
       <span class="stat-label">Integrations</span>
     </div>
     <div class="stat">
@@ -994,16 +1273,16 @@ footer {
 <section>
   <div class="section-inner">
     <div class="problem-grid">
-      <div class="problem-text">
+      <div class="problem-text reveal">
         <div class="label">The problem</div>
         <h2>Hidden in the merge,<br>invisible in the PR</h2>
         <p>When both parent branches contain <strong>identical files</strong>, Git&rsquo;s three-way merge algorithm outputs them unchanged. The only way to get a different result is to manually edit files during the merge.</p>
         <p>GitHub&rsquo;s PR diff doesn&rsquo;t show merge commits. <code>git log</code> doesn&rsquo;t surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
         <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> &mdash; on every developer machine and every CI build.</p>
-        <p>It&rsquo;s a <strong>supply chain attack</strong> via code injection — and it bypasses every standard git security tool.</p>
+        <p>It&rsquo;s a <strong>supply chain attack</strong> via code injection &mdash; and it bypasses every standard git security tool.</p>
       </div>
 
-      <div class="diff-card">
+      <div class="diff-card reveal">
         <div class="diff-header">
           <span class="diff-filename">vite.config.js &mdash; merge commit ab90bd7</span>
           <span class="diff-badge">Evil Merge</span>
@@ -1023,8 +1302,7 @@ footer {
           </div>
           <div class="diff-sep"></div>
           <div class="diff-note">
-            When both parents are identical, Git cannot<br>
-            produce a different output on its own.
+            When both parents are identical, Git cannot produce a different output on its own.
           </div>
         </div>
       </div>
@@ -1042,21 +1320,18 @@ footer {
     <p class="section-sub">For each merge commit, we reconstruct what Git should have produced and compare it to what the commit actually contains.</p>
 
     <div class="steps">
-      <div class="step">
-        <div class="step-num" aria-hidden="true">01</div>
-        <div class="step-label">Step 01</div>
+      <div class="step reveal">
+        <div class="step-num">01</div>
         <h3>Find the merge base</h3>
         <p>Identify the common ancestor of the two parent commits &mdash; the starting point for the three-way merge algorithm.</p>
       </div>
-      <div class="step">
-        <div class="step-num" aria-hidden="true">02</div>
-        <div class="step-label">Step 02</div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
         <h3>Reconstruct expected tree</h3>
         <p>Run a clean three-way merge of the parent trees. This is what Git would produce with no manual intervention.</p>
       </div>
-      <div class="step">
-        <div class="step-num" aria-hidden="true">03</div>
-        <div class="step-label">Step 03</div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
         <h3>Compare against reality</h3>
         <p>Diff the expected tree against the actual merge commit. Any difference is a file manually edited during the merge.</p>
       </div>
@@ -1071,26 +1346,26 @@ footer {
   <div class="section-inner">
     <div class="label">Integrations</div>
     <h2>Works where you<br>already work</h2>
-    <p class="section-sub">Three ways to add evil merge detection &mdash; pick what fits your workflow.</p>
+    <p class="section-sub">Multiple ways to add evil merge detection &mdash; pick what fits your workflow.</p>
 
     <div class="integrations">
-      <div class="integration">
-        <div class="int-icon">CLI</div>
+      <div class="integration reveal">
+        <div class="int-badge cli">CLI</div>
         <h3>Command Line</h3>
         <p>Scan any repository from the terminal. Supports JSON and SARIF output for GitHub Code Scanning.</p>
         <pre>brew install fimskiy/tap/evilmerge
 evilmerge scan .</pre>
       </div>
-      <div class="integration">
-        <div class="int-icon">Action</div>
+      <div class="integration reveal">
+        <div class="int-badge action">Action</div>
         <h3>GitHub Action</h3>
         <p>Add to your workflow and get annotations directly on pull requests. Zero configuration.</p>
         <pre>- uses: fimskiy/Evil-merge-detector@v1
   with:
     fail-on: warning</pre>
       </div>
-      <div class="integration">
-        <div class="int-icon">App</div>
+      <div class="integration reveal">
+        <div class="int-badge app">App</div>
         <h3>GitHub App</h3>
         <p>Install once, get automatic checks on every PR. No workflow changes needed.</p>
         <pre>Install from GitHub Marketplace
@@ -1110,8 +1385,16 @@ evilmerge scan .</pre>
     <h2>Simple, per-organization<br>pricing</h2>
     <p class="section-sub">The CLI and GitHub Action are always free and open source.</p>
 
+    <div class="pricing-toggle">
+      <span class="toggle-label active" id="lbl-monthly">Monthly</span>
+      <button class="toggle-switch" id="billing-toggle" aria-label="Switch billing period">
+        <span class="toggle-knob"></span>
+      </button>
+      <span class="toggle-label" id="lbl-annual">Annual <span class="save-badge">Save 20%</span></span>
+    </div>
+
     <div class="pricing-wrap">
-      <div class="plan">
+      <div class="plan reveal">
         <div class="plan-tier">Free</div>
         <div class="plan-price">
           <span class="price-amount">$0</span>
@@ -1126,14 +1409,15 @@ evilmerge scan .</pre>
           <li class="no"><span class="check">&ndash;</span> Unlimited scans</li>
         </ul>
         <a class="plan-btn" href="https://github.com/apps/evil-merge-detector">Install for free</a>
+        <p class="plan-note">No credit card required</p>
       </div>
 
-      <div class="plan featured">
+      <div class="plan featured reveal">
         <div class="plan-tier">Pro</div>
         <div class="plan-price">
           <span class="price-currency">$</span>
-          <span class="price-amount">7</span>
-          <span class="price-period">/month</span>
+          <span class="price-amount" id="pro-price">7</span>
+          <span class="price-period" id="pro-period">/month</span>
         </div>
         <div class="plan-desc">For teams and private repositories</div>
         <ul>
@@ -1144,7 +1428,41 @@ evilmerge scan .</pre>
           <li><span class="check">&#10003;</span> Priority support</li>
         </ul>
         <a class="plan-btn" href="https://github.com/marketplace/evil-merge-detector">Upgrade to Pro</a>
+        <p class="plan-note">Cancel anytime · No lock-in</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-inner">
+    <div class="label">FAQ</div>
+    <h2>Common questions</h2>
+
+    <div class="faq-list">
+      <details class="faq-item reveal">
+        <summary class="faq-q">Does it need access to my source code?</summary>
+        <p class="faq-a">The GitHub App requests read-only access to repository contents and checks — the minimum required to scan merge commits. The CLI runs entirely locally; nothing leaves your machine.</p>
+      </details>
+      <details class="faq-item reveal">
+        <summary class="faq-q">What counts as a PR scan?</summary>
+        <p class="faq-a">One scan = one pull request event (opened or synchronized). Scans that find no merge commits in the PR are not counted against your limit.</p>
+      </details>
+      <details class="faq-item reveal">
+        <summary class="faq-q">Can it produce false positives?</summary>
+        <p class="faq-a">No. The detection is deterministic: if both parent branches have identical file content, Git's algorithm cannot produce a different output. Any difference is a manual edit — there is no ambiguity.</p>
+      </details>
+      <details class="faq-item reveal">
+        <summary class="faq-q">Does it work with GitLab or Bitbucket?</summary>
+        <p class="faq-a">The CLI works with any Git repository regardless of host. Ready-to-use CI templates for GitLab CI and Bitbucket Pipelines are available in the repository. The GitHub App and GitHub Checks integration are GitHub-only.</p>
+      </details>
+      <details class="faq-item reveal">
+        <summary class="faq-q">What happens when I exceed 50 scans on the Free plan?</summary>
+        <p class="faq-a">Additional PRs will not be scanned and the check run will be skipped with a note explaining the limit. No errors, no failed checks — just a nudge to upgrade.</p>
+      </details>
     </div>
   </div>
 </section>
@@ -1157,7 +1475,7 @@ evilmerge scan .</pre>
     <p class="section-sub">Install the GitHub App and start scanning automatically &mdash; no workflow changes needed.</p>
     <div class="cta-actions">
       <a class="btn-primary" href="https://github.com/apps/evil-merge-detector">Install GitHub App</a>
-      <a class="btn-secondary" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
+      <a class="btn-secondary link-arrow" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
     </div>
   </div>
 </section>
@@ -1166,12 +1484,113 @@ evilmerge scan .</pre>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">EVIL<span class="accent">_</span>MERGE<span class="accent">.</span>DETECT &mdash; open source on <a href="https://github.com/fimskiy/Evil-merge-detector" class="footer-gh-link">GitHub</a></div>
+  <div class="footer-logo">Evil Merge <span class="accent">Detector</span> &mdash; open source on <a href="https://github.com/fimskiy/Evil-merge-detector" class="footer-gh-link link-arrow">GitHub</a></div>
   <div class="footer-links">
     <a href="https://github.com/fimskiy/Evil-merge-detector">Docs</a>
     <a href="https://github.com/apps/evil-merge-detector">Install</a>
   </div>
 </footer>
 
+<script>
+(function() {
+  // Scroll reveal
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    observer.observe(el);
+  });
+
+  // Animate counters
+  function animateCounters() {
+    var bar = document.querySelector('.stats-bar');
+    if (!bar || bar.dataset.counted) return;
+    var rect = bar.getBoundingClientRect();
+    if (rect.top >= window.innerHeight) return;
+    bar.dataset.counted = '1';
+    bar.querySelectorAll('[data-target]').forEach(function(el) {
+      var target = parseInt(el.dataset.target, 10);
+      if (target === 0) return;
+      var duration = 1400;
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        el.textContent = Math.round((1 - Math.pow(1 - progress, 3)) * target);
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  animateCounters();
+  window.addEventListener('scroll', animateCounters, { passive: true });
+
+  // Terminal typing animation
+  var cmd = 'evilmerge scan .';
+  var el = document.getElementById('typed-cmd');
+  var cursor = el ? el.nextElementSibling : null;
+  var output = document.getElementById('term-output');
+  if (el) {
+    var i = 0;
+    function type() {
+      if (i <= cmd.length) {
+        el.textContent = cmd.slice(0, i);
+        i++;
+        setTimeout(type, 60 + Math.random() * 40);
+      } else {
+        if (cursor) cursor.style.display = 'none';
+        setTimeout(function() {
+          if (output) output.style.display = '';
+        }, 300);
+      }
+    }
+    setTimeout(type, 900);
+  }
+
+  // Mobile nav
+  var menuBtn = document.getElementById('nav-menu-btn');
+  var mobileNav = document.getElementById('mobile-nav');
+  if (menuBtn && mobileNav) {
+    menuBtn.addEventListener('click', function() {
+      var open = mobileNav.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menuBtn.innerHTML = open ? '&#10005;' : '&#9776;';
+    });
+    mobileNav.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        mobileNav.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.innerHTML = '&#9776;';
+      });
+    });
+  }
+
+  // Pricing toggle
+  var toggle = document.getElementById('billing-toggle');
+  var proPrice = document.getElementById('pro-price');
+  var proPeriod = document.getElementById('pro-period');
+  var lblMonthly = document.getElementById('lbl-monthly');
+  var lblAnnual = document.getElementById('lbl-annual');
+  var isAnnual = false;
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      isAnnual = !isAnnual;
+      toggle.classList.toggle('annual', isAnnual);
+      if (proPrice) proPrice.textContent = isAnnual ? '56' : '7';
+      if (proPeriod) proPeriod.textContent = isAnnual ? '/year' : '/month';
+      if (lblMonthly) lblMonthly.classList.toggle('active', !isAnnual);
+      if (lblAnnual) lblAnnual.classList.toggle('active', isAnnual);
+    });
+  }
+})();
+</script>
+
 </body>
-</html>`
+</html>
+`
