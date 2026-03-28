@@ -1207,7 +1207,7 @@ footer {
 #coming-soon {
   position: fixed;
   inset: 0;
-  z-index: 500;
+  z-index: 700;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   background: rgba(255,255,255,0.55);
@@ -1276,7 +1276,7 @@ footer {
     </div>
 
     <h1>
-      Detect <span class="threat">evil merge</span> commits<br>before they ship<span class="cursor"></span>
+      Detect <span class="threat">evil merge</span> commits<br>before they ship<span class="cursor" aria-hidden="true"></span>
     </h1>
 
     <p class="hero-sub">
@@ -1457,7 +1457,7 @@ evilmerge scan .</pre>
 
     <div class="pricing-toggle">
       <span class="toggle-label active" id="lbl-monthly">Monthly</span>
-      <button class="toggle-switch" id="billing-toggle" aria-label="Switch billing period">
+      <button class="toggle-switch" id="billing-toggle" aria-label="Switch billing period" aria-pressed="false">
         <span class="toggle-knob"></span>
       </button>
       <span class="toggle-label" id="lbl-annual">Annual <span class="save-badge">Save 20%</span></span>
@@ -1563,7 +1563,7 @@ evilmerge scan .</pre>
 </footer>
 
 <!-- COOKIE BANNER -->
-<div id="cookie-banner" style="display:none" role="dialog" aria-label="Cookie consent">
+<div id="cookie-banner" style="display:none" role="dialog" aria-modal="true" aria-label="Cookie consent">
   <p>We use Google Analytics to understand how visitors use this site. No personally identifiable information is collected. <a href="/privacy">Privacy Policy</a></p>
   <div class="cookie-actions">
     <button class="cookie-btn cookie-btn-decline" id="cookie-decline">Decline</button>
@@ -1662,7 +1662,8 @@ evilmerge scan .</pre>
     toggle.addEventListener('click', function() {
       isAnnual = !isAnnual;
       toggle.classList.toggle('annual', isAnnual);
-      if (proPrice) proPrice.textContent = isAnnual ? '56' : '7';
+      toggle.setAttribute('aria-pressed', isAnnual ? 'true' : 'false');
+      if (proPrice) proPrice.textContent = isAnnual ? '67' : '7';
       if (proPeriod) proPeriod.textContent = isAnnual ? '/year' : '/month';
       if (lblMonthly) lblMonthly.classList.toggle('active', !isAnnual);
       if (lblAnnual) lblAnnual.classList.toggle('active', isAnnual);
@@ -1691,19 +1692,27 @@ evilmerge scan .</pre>
   var banner = document.getElementById('cookie-banner');
   if (!banner) return;
 
+  var acceptBtn = document.getElementById('cookie-accept');
+  var declineBtn = document.getElementById('cookie-decline');
+  if (!acceptBtn || !declineBtn) return;
+
   if (consent !== 'declined') {
     banner.style.display = '';
-    document.body.style.paddingBottom = banner.offsetHeight + 'px';
+    // Read offsetHeight after display change forces reflow
+    requestAnimationFrame(function() {
+      document.body.style.paddingBottom = banner.offsetHeight + 'px';
+      acceptBtn.focus();
+    });
   }
 
-  document.getElementById('cookie-accept').addEventListener('click', function() {
+  acceptBtn.addEventListener('click', function() {
     localStorage.setItem(CONSENT_KEY, 'accepted');
     banner.style.display = 'none';
     document.body.style.paddingBottom = '';
     loadGTM();
   });
 
-  document.getElementById('cookie-decline').addEventListener('click', function() {
+  declineBtn.addEventListener('click', function() {
     localStorage.setItem(CONSENT_KEY, 'declined');
     banner.style.display = 'none';
     document.body.style.paddingBottom = '';
@@ -1785,7 +1794,7 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
   <p class="updated">Last updated: March 28, 2026</p>
 
   <h2>1. Data Controller</h2>
-  <p>The operator of evilmerge.dev. For any privacy-related requests, contact: <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a></p>
+  <p>Evil Merge Detector (evilmerge.dev), operated by Dmitrii Fimskiy. For any privacy-related requests, contact: <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a></p>
 
   <h2>2. What Data We Collect</h2>
   <p>We use Google Analytics (via Google Tag Manager) to understand how visitors use this site. Google Analytics collects:</p>
@@ -1824,8 +1833,11 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
   <p>You also have the right to lodge a complaint with the Polish data protection authority (UODO): <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a></p>
 
   <h2>7. Withdrawing Consent</h2>
-  <p>To withdraw your cookie consent, clear your browser's localStorage for evilmerge.dev (browser Settings &rarr; Privacy &rarr; Site data, or use developer tools). The cookie banner will reappear and Google Analytics will not load until you accept again.</p>
-  <p>You can also opt out of Google Analytics tracking globally using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a>.</p>
+  <p>You can withdraw your cookie consent at any time by clicking the button below. Google Analytics will stop loading on future visits.</p>
+  <p style="margin-top:16px">
+    <button onclick="localStorage.removeItem('emd_cookie_consent');this.textContent='Done — reload the page to see the banner again';this.disabled=true;" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;">Revoke cookie consent</button>
+  </p>
+  <p style="margin-top:12px">You can also opt out of Google Analytics tracking globally using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a>.</p>
 
   <h2>8. Cookies</h2>
   <p>We do not set any cookies directly. Google Analytics sets cookies on our behalf (e.g. <code>_ga</code>, <code>_ga_*</code>) only after you accept via the cookie banner. These cookies identify unique sessions for analytics purposes and expire after 13–24 months.</p>

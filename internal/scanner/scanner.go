@@ -259,10 +259,10 @@ func (s *Scanner) Scan(ctx context.Context, opts models.ScanOptions) (*models.Sc
 		if c.NumParents() != 2 || shouldSkipCommit(c, opts) {
 			return nil
 		}
-		result.TotalMerges++
 		if opts.Limit > 0 && len(merges) >= opts.Limit {
 			return errLimitReached
 		}
+		result.TotalMerges++
 		merges = append(merges, c)
 		return nil
 	})

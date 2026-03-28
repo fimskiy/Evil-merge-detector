@@ -35,17 +35,20 @@ func Set(w http.ResponseWriter, d *Data, secret []byte) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteStrictMode,
 		Expires:  time.Now().Add(30 * 24 * time.Hour),
 	})
 }
 
 func Clear(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
-		Name:    cookieName,
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
+		Name:     cookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Expires:  time.Unix(0, 0),
 	})
 }
 

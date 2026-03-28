@@ -68,7 +68,7 @@ evilmerge scan --timeout=60s
 **Example output:**
 
 ```
-Evil Merge Detector v0.1.5
+Evil Merge Detector v0.1.9
 Scanning repository: /path/to/repo (branch: main)
 Analyzed 142 merge commits, found 2 evil merges (in 340ms)
 

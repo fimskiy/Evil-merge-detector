@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] - 2026-03-28
+
+### Security
+
+- HTTP security headers middleware (X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy, CSP)
+- Per-IP rate limiting (100 req/min, CF-Connecting-IP aware)
+- OAuth state cookie SameSite=Lax; session cookie SameSite=Strict
+- `crypto/rand` error checked in `randomState()` — predictable state prevented
+- Graceful shutdown on SIGTERM/SIGINT with 30s drain; HTTP IdleTimeout=120s
+
+### Fixed
+
+- Goroutine leak in history scan — missing `wg.Wait()` could write to destroyed channel
+- Marketplace webhook used `account.GetID()` (user ID) instead of installation ID — Pro plan was never applied
+- Dashboard template rendered to `w` before error check; now uses `bytes.Buffer`
+- `TotalMerges` counted the commit that triggered the scan limit
+- Removed dead `worker.NewGitHubClient()`
+- Webhook switch missing `default` — unknown event types now logged
+- Annual pricing "Save 20%" showed $56 instead of $67
+
+### Added
+
+- Dashboard notice when GitHub App is not installed
+- GDPR: Data Controller name in Privacy Policy; one-click consent revoke on /privacy
+- Accessibility: focus trap on cookie banner, `aria-modal`, `aria-pressed`, `aria-hidden` on cursor span
+- Tests for `session`, `oauth`, `dashboard` packages
+- OG image at `/og-image.png`
+- Landing page SEO: OG tags, Twitter Card, schema.org JSON-LD, canonical URL
+
+### Changed
+
+- Domain: `evilmerge.dev`
+- Landing page redesigned with coming-soon overlay
+
 ## [0.1.5] - 2026-03-27
 
 ### Added

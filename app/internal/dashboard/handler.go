@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"bytes"
 	"html/template"
 	"log"
 	"net/http"
@@ -21,9 +22,10 @@ func New(secret []byte, db *store.Store) *Handler {
 }
 
 type pageData struct {
-	Login string
-	Plan  string
-	Scans []store.ScanRecord
+	Login        string
+	Plan         string
+	Scans        []store.ScanRecord
+	AppInstalled bool
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +35,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := pageData{Login: sess.GitHubLogin}
+	data := pageData{Login: sess.GitHubLogin, AppInstalled: sess.InstallationID != 0}
 
 	if h.db != nil && sess.InstallationID != 0 {
 		inst, err := h.db.GetInstallation(r.Context(), sess.InstallationID)
@@ -46,10 +48,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := h.tmpl.Execute(w, data); err != nil {
+	var buf bytes.Buffer
+	if err := h.tmpl.Execute(&buf, data); err != nil {
 		log.Printf("dashboard template: %v", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
 	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = buf.WriteTo(w)
 }
 
 var dashboardTmpl = `<!DOCTYPE html>
@@ -72,6 +78,8 @@ a.logout:hover { color: #e6edf3; }
 main { max-width: 960px; margin: 40px auto; padding: 0 24px; }
 h2 { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
 .empty { color: #8b949e; font-size: 14px; padding: 40px 0; text-align: center; }
+.install-notice { background: #1c2128; border: 1px solid #388bfd; border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; font-size: 14px; color: #e6edf3; }
+.install-notice a { color: #58a6ff; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; padding: 8px 12px; color: #8b949e; font-weight: 500; border-bottom: 1px solid #21262d; }
 td { padding: 10px 12px; border-bottom: 1px solid #21262d; vertical-align: middle; }
@@ -95,6 +103,13 @@ tr:hover td { background: #161b22; }
   </div>
 </header>
 <main>
+  {{if not .AppInstalled}}
+  <div class="install-notice">
+    GitHub App is not installed for your account yet.
+    <a href="https://github.com/apps/evil-merge-detector" target="_blank" rel="noopener">Install it</a>
+    to start scanning pull requests automatically.
+  </div>
+  {{end}}
   <h2>Recent scans</h2>
   {{if not .Scans}}
   <p class="empty">No scans yet. Open a pull request in a repository where the app is installed.</p>

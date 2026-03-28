@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"golang.org/x/oauth2"
@@ -35,13 +36,18 @@ func New(clientID, clientSecret string, secret []byte, db *store.Store) *Handler
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	state := randomState()
+	state, err := randomState()
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "oauth_state",
 		Value:    state,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
 		MaxAge:   300,
 	})
 	http.Redirect(w, r, h.cfg.AuthCodeURL(state), http.StatusFound)
@@ -111,8 +117,11 @@ func fetchUser(ctx context.Context, cfg *oauth2.Config, token *oauth2.Token) (*g
 	return &u, nil
 }
 
-func randomState() string {
+func randomState() (string, error) {
 	b := make([]byte, 16)
-	rand.Read(b)
-	return base64.RawURLEncoding.EncodeToString(b)
+	if _, err := rand.Read(b); err != nil {
+		log.Printf("oauth: rand.Read: %v", err)
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }

@@ -7,8 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/go-github/v84/github"
-
 	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
 	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
@@ -137,6 +135,3 @@ func runScan(ctx context.Context, job PRJob) (*models.ScanResult, error) {
 	})
 }
 
-func NewGitHubClient(appID, installationID int64, privateKey []byte) (*github.Client, error) {
-	return ghclient.ForInstallation(appID, installationID, privateKey)
-}

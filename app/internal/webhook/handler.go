@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/google/go-github/v84/github"
@@ -48,6 +49,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.handleInstallation(ctx, e)
 	case *github.MarketplacePurchaseEvent:
 		h.handleMarketplace(ctx, e)
+	default:
+		log.Printf("webhook: unhandled event type %T", e)
 	}
 }
 
@@ -123,6 +126,7 @@ func (h *Handler) triggerHistoryScan(installationID int64) {
 	}
 	const maxConcurrent = 3
 	sem := make(chan struct{}, maxConcurrent)
+	var wg sync.WaitGroup
 
 	for _, repo := range repos {
 		job := worker.HistoryJob{
@@ -137,11 +141,14 @@ func (h *Handler) triggerHistoryScan(installationID int64) {
 			Notifier:       h.notifier,
 		}
 		sem <- struct{}{}
+		wg.Add(1)
 		go func(j worker.HistoryJob) {
+			defer wg.Done()
 			defer func() { <-sem }()
 			worker.ScanHistory(j)
 		}(job)
 	}
+	wg.Wait()
 }
 
 func (h *Handler) handleMarketplace(ctx context.Context, e *github.MarketplacePurchaseEvent) {
@@ -152,22 +159,26 @@ func (h *Handler) handleMarketplace(ctx context.Context, e *github.MarketplacePu
 	purchase := e.GetMarketplacePurchase()
 	account := purchase.GetAccount()
 	plan := purchase.GetPlan().GetName()
+	login := account.GetLogin()
+
+	// Marketplace events carry account.id (user/org ID), not installation.id.
+	// Look up the real installation by login to update its plan.
+	inst, err := h.db.GetInstallationByLogin(ctx, login)
+	if err != nil {
+		log.Printf("marketplace: installation not found for %s: %v", login, err)
+		return
+	}
 
 	switch e.GetAction() {
 	case "purchased", "changed":
-		if err := h.db.UpsertInstallation(ctx, store.Installation{
-			InstallationID: account.GetID(),
-			AccountLogin:   account.GetLogin(),
-			AccountType:    account.GetType(),
-			Plan:           plan,
-		}); err != nil {
-			log.Printf("marketplace upsert %s: %v", account.GetLogin(), err)
+		if err := h.db.UpdatePlan(ctx, inst.InstallationID, plan); err != nil {
+			log.Printf("marketplace upsert %s: %v", login, err)
 		}
-		log.Printf("marketplace: %s %s → plan %s", e.GetAction(), account.GetLogin(), plan)
+		log.Printf("marketplace: %s %s → plan %s", e.GetAction(), login, plan)
 	case "cancelled":
-		if err := h.db.UpdatePlan(ctx, account.GetID(), "free"); err != nil {
-			log.Printf("marketplace cancel %s: %v", account.GetLogin(), err)
+		if err := h.db.UpdatePlan(ctx, inst.InstallationID, "free"); err != nil {
+			log.Printf("marketplace cancel %s: %v", login, err)
 		}
-		log.Printf("marketplace: cancelled %s", account.GetLogin())
+		log.Printf("marketplace: cancelled %s", login)
 	}
 }

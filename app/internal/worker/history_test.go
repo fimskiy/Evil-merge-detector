@@ -74,18 +74,27 @@ func localCloneFn(t *testing.T) func(ctx context.Context, _, _ int64, _ []byte, 
 func TestScanHistory_FindsEvilMerge(t *testing.T) {
 	dir := setupEvilRepo(t)
 
+	var found atomic.Bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		found.Store(true)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
 	job := HistoryJob{
 		Owner:         "test",
 		Repo:          "testrepo",
 		DefaultBranch: "main",
 		CloneURL:      dir,
+		Notifier:      notifier.New(srv.URL, ""),
 		cloneFn:       localCloneFn(t),
 	}
 
-	// Run synchronously (ScanHistory blocks internally).
 	ScanHistory(job)
-	// No assertion on result since DB is nil — we just verify it doesn't panic.
-	// The real assertion: no panic and no fatal log crash.
+
+	if !found.Load() {
+		t.Error("expected evil merge to be detected and notifier called")
+	}
 }
 
 func TestScanHistory_CloneFailure(t *testing.T) {
