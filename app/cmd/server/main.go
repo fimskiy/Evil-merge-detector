@@ -59,6 +59,7 @@ func main() {
 	}
 	mux.Handle("/badge/", badge.New(badgeStore))
 	mux.HandleFunc("/og-image.png", landing.OGImageHandler)
+	mux.HandleFunc("/privacy", landing.PrivacyHandler)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})

@@ -12,9 +12,28 @@ var ogImage []byte
 
 var tmpl = template.Must(template.New("landing").Parse(page))
 
+var euCountries = map[string]bool{
+	"AT": true, "BE": true, "BG": true, "CY": true, "CZ": true,
+	"DE": true, "DK": true, "EE": true, "ES": true, "FI": true,
+	"FR": true, "GR": true, "HR": true, "HU": true, "IE": true,
+	"IT": true, "LT": true, "LU": true, "LV": true, "MT": true,
+	"NL": true, "PL": true, "PT": true, "RO": true, "SE": true,
+	"SI": true, "SK": true,
+	"IS": true, "LI": true, "NO": true,
+	"GB": true, "CH": true,
+}
+
+type pageData struct {
+	ShowCookieBanner bool
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) {
+	country := r.Header.Get("CF-IPCountry")
+	data := pageData{
+		ShowCookieBanner: country == "" || euCountries[country],
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := tmpl.Execute(w, nil); err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		log.Printf("landing template: %v", err)
 	}
 }
@@ -25,9 +44,19 @@ func OGImageHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(ogImage)
 }
 
+var privacyTmpl = template.Must(template.New("privacy").Parse(privacyPage))
+
+func PrivacyHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := privacyTmpl.Execute(w, nil); err != nil {
+		log.Printf("privacy template: %v", err)
+	}
+}
+
 var page = `<!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- GTM loads after cookie consent (see JS at bottom) -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Detect Evil Merge Commits in Git — Evil Merge Detector</title>
@@ -386,7 +415,7 @@ h1 .threat { color: var(--red); }
   font-size: 13.5px;
   line-height: 1.9;
   color: var(--text-mid);
-  min-height: 210px;
+  min-height: 260px;
 }
 .t-dim    { color: var(--text-muted); }
 .t-prompt { color: var(--text-muted); }
@@ -1135,6 +1164,46 @@ footer {
   nav { padding: 0 16px; }
   section { padding: 48px 16px; }
 }
+
+/* COOKIE BANNER */
+#cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 600;
+  background: var(--text);
+  color: #e2e8f0;
+  padding: 14px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+}
+#cookie-banner p { margin: 0; }
+#cookie-banner a { color: #93c5fd; text-decoration: underline; text-underline-offset: 2px; }
+.cookie-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.cookie-btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.cookie-btn:hover { opacity: 0.85; }
+.cookie-btn-accept { background: var(--red); color: #fff; }
+.cookie-btn-decline { background: transparent; color: #94a3b8; border: 1px solid #475569; }
+@media (max-width: 640px) {
+  #cookie-banner { flex-direction: column; align-items: flex-start; padding: 16px 20px; gap: 12px; }
+}
+
+/* COMING SOON */
 #coming-soon {
   position: fixed;
   inset: 0;
@@ -1155,7 +1224,8 @@ footer {
 #coming-soon .terminal-body { min-height: auto; }
 </style>
 </head>
-<body>
+<body{{if .ShowCookieBanner}} data-eu="1"{{end}}>
+
 <div id="coming-soon" aria-live="polite">
   <div class="terminal">
     <div class="terminal-bar">
@@ -1182,7 +1252,7 @@ footer {
     <a href="#pricing">Pricing</a>
     <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
   </div>
-  <a class="nav-cta" href="https://github.com/apps/evil-merge-detector">Install App</a>
+  <a class="nav-cta" id="btn-nav-install" href="https://github.com/apps/evil-merge-detector">Install App</a>
   <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false">&#9776;</button>
 </nav>
 <div class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
@@ -1216,10 +1286,10 @@ footer {
 
     <div class="hero-actions">
       <div class="cta-group">
-        <a class="btn-primary" href="https://github.com/apps/evil-merge-detector">Start Scanning — Free</a>
+        <a class="btn-primary" id="btn-hero-install" href="https://github.com/apps/evil-merge-detector">Start Scanning — Free</a>
         <span class="cta-note">No credit card required</span>
       </div>
-      <a class="btn-secondary link-arrow" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
+      <a class="btn-secondary link-arrow" id="btn-hero-github" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
     </div>
 
     <div class="terminal">
@@ -1408,7 +1478,7 @@ evilmerge scan .</pre>
           <li><span class="check">&#10003;</span> Scan history dashboard</li>
           <li class="no"><span class="check">&ndash;</span> Unlimited scans</li>
         </ul>
-        <a class="plan-btn" href="https://github.com/apps/evil-merge-detector">Install for free</a>
+        <a class="plan-btn" id="btn-plan-free" href="https://github.com/apps/evil-merge-detector">Install for free</a>
         <p class="plan-note">No credit card required</p>
       </div>
 
@@ -1427,7 +1497,7 @@ evilmerge scan .</pre>
           <li><span class="check">&#10003;</span> Scan history dashboard</li>
           <li><span class="check">&#10003;</span> Priority support</li>
         </ul>
-        <a class="plan-btn" href="https://github.com/marketplace/evil-merge-detector">Upgrade to Pro</a>
+        <a class="plan-btn" id="btn-plan-pro" href="https://github.com/marketplace/evil-merge-detector">Upgrade to Pro</a>
         <p class="plan-note">Cancel anytime · No lock-in</p>
       </div>
     </div>
@@ -1474,8 +1544,8 @@ evilmerge scan .</pre>
     <h2>Your next merge could be<br>hiding something.</h2>
     <p class="section-sub">Install the GitHub App and start scanning automatically &mdash; no workflow changes needed.</p>
     <div class="cta-actions">
-      <a class="btn-primary" href="https://github.com/apps/evil-merge-detector">Install GitHub App</a>
-      <a class="btn-secondary link-arrow" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
+      <a class="btn-primary" id="btn-cta-install" href="https://github.com/apps/evil-merge-detector">Install GitHub App</a>
+      <a class="btn-secondary link-arrow" id="btn-cta-github" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
     </div>
   </div>
 </section>
@@ -1488,8 +1558,18 @@ evilmerge scan .</pre>
   <div class="footer-links">
     <a href="https://github.com/fimskiy/Evil-merge-detector">Docs</a>
     <a href="https://github.com/apps/evil-merge-detector">Install</a>
+    <a href="/privacy">Privacy Policy</a>
   </div>
 </footer>
+
+<!-- COOKIE BANNER -->
+<div id="cookie-banner" style="display:none" role="dialog" aria-label="Cookie consent">
+  <p>We use Google Analytics to understand how visitors use this site. No personally identifiable information is collected. <a href="/privacy">Privacy Policy</a></p>
+  <div class="cookie-actions">
+    <button class="cookie-btn cookie-btn-decline" id="cookie-decline">Decline</button>
+    <button class="cookie-btn cookie-btn-accept" id="cookie-accept">Accept</button>
+  </div>
+</div>
 
 <script>
 (function() {
@@ -1589,8 +1669,174 @@ evilmerge scan .</pre>
     });
   }
 })();
+
+// Cookie consent + GTM (EU only, detected server-side via CF-IPCountry)
+(function() {
+  if (!document.body.dataset.eu) { loadGTM(); return; }
+
+  var CONSENT_KEY = 'emd_cookie_consent';
+
+  function loadGTM() {
+    window.dataLayer = window.dataLayer || [];
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-K6K4PH7S');
+  }
+
+  var consent = localStorage.getItem(CONSENT_KEY);
+  if (consent === 'accepted') { loadGTM(); return; }
+
+  var banner = document.getElementById('cookie-banner');
+  if (!banner) return;
+
+  if (consent !== 'declined') {
+    banner.style.display = '';
+    document.body.style.paddingBottom = banner.offsetHeight + 'px';
+  }
+
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem(CONSENT_KEY, 'accepted');
+    banner.style.display = 'none';
+    document.body.style.paddingBottom = '';
+    loadGTM();
+  });
+
+  document.getElementById('cookie-decline').addEventListener('click', function() {
+    localStorage.setItem(CONSENT_KEY, 'declined');
+    banner.style.display = 'none';
+    document.body.style.paddingBottom = '';
+  });
+})();
 </script>
 
+</body>
+</html>
+`
+
+var privacyPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Evil Merge Detector</title>
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://evilmerge.dev/privacy">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16 2L28 6L28 18C28 24 22 29 16 31C10 29 4 24 4 18L4 6Z' fill='%23dc2626'/%3E%3Cpath d='M16 5L26 8.5L26 18C26 23 21 27 16 29C11 27 6 23 6 18L6 8.5Z' fill='%23b91c1c'/%3E%3Ccircle cx='16' cy='12' r='2.5' fill='white'/%3E%3Ccircle cx='11' cy='17' r='2' fill='white'/%3E%3Ccircle cx='16' cy='22' r='2.2' fill='white'/%3E%3Ccircle cx='21' cy='17' r='2.5' fill='%237f1d1d'/%3E%3Cline x1='20' y1='16' x2='22' y2='18' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='22' y1='16' x2='20' y2='18' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --border: #e2e8f0;
+  --red: #dc2626;
+  --text: #0f172a;
+  --text-mid: #334155;
+  --text-muted: #64748b;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+a { color: var(--red); text-decoration: none; }
+a:hover { text-decoration: underline; }
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 60px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); display: flex; align-items: center; gap: 10px; }
+.nav-logo svg { width: 32px; height: 32px; flex-shrink: 0; }
+.accent { color: var(--red); }
+main { max-width: 720px; margin: 0 auto; padding: 64px 24px 96px; }
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+.updated { color: var(--text-muted); font-size: 14px; margin-bottom: 48px; }
+h2 { font-size: 1.1rem; font-weight: 600; margin-top: 40px; margin-bottom: 12px; }
+p { color: var(--text-mid); margin-bottom: 16px; }
+ul { color: var(--text-mid); padding-left: 20px; margin-bottom: 16px; }
+li { margin-bottom: 6px; }
+footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+@media (max-width: 640px) { nav { padding: 0 20px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M16 2L28 6L28 18C28 24 22 29 16 31C10 29 4 24 4 18L4 6Z" fill="#dc2626"/>
+      <path d="M16 5L26 8.5L26 18C26 23 21 27 16 29C11 27 6 23 6 18L6 8.5Z" fill="#b91c1c"/>
+      <circle cx="16" cy="12" r="2.5" fill="white"/>
+      <circle cx="11" cy="17" r="2" fill="white"/>
+      <circle cx="16" cy="22" r="2.2" fill="white"/>
+      <circle cx="21" cy="17" r="2.5" fill="#7f1d1d"/>
+      <line x1="20" y1="16" x2="22" y2="18" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="22" y1="16" x2="20" y2="18" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    <span>Evil Merge <span class="accent">Detector</span></span>
+  </a>
+</nav>
+
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: March 28, 2026</p>
+
+  <h2>1. Data Controller</h2>
+  <p>The operator of evilmerge.dev. For any privacy-related requests, contact: <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a></p>
+
+  <h2>2. What Data We Collect</h2>
+  <p>We use Google Analytics (via Google Tag Manager) to understand how visitors use this site. Google Analytics collects:</p>
+  <ul>
+    <li>Pages visited and time spent on each page</li>
+    <li>Browser type, operating system, and device type</li>
+    <li>Approximate geographic location (country and city, derived from IP address)</li>
+    <li>Referral source (how you found the site)</li>
+    <li>Session duration and navigation path</li>
+  </ul>
+  <p>IP addresses are anonymized before storage. We do not collect your name, email address, or any other personally identifiable information through Google Analytics.</p>
+  <p>We also store a single item in your browser's <code>localStorage</code> (<code>emd_cookie_consent</code>) to remember your cookie consent decision. This item never leaves your browser.</p>
+
+  <h2>3. Purpose and Legal Basis</h2>
+  <p>We use analytics data to understand which features are most useful, identify usability issues, and improve the product. The legal basis for this processing is your consent (Article 6(1)(a) GDPR), given via the cookie banner on our site.</p>
+
+  <h2>4. Data Retention</h2>
+  <p>Google Analytics retains aggregated usage data for 14 months. The <code>localStorage</code> consent flag is retained in your browser until you clear your browser storage.</p>
+
+  <h2>5. Third Parties</h2>
+  <p>We share analytics data only with <strong>Google LLC</strong> (Google Analytics / Google Tag Manager). Google processes this data under its own privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>. Google LLC participates in the EU–US Data Privacy Framework.</p>
+  <p>No other third parties receive your data from this website.</p>
+
+  <h2>6. Your Rights (GDPR)</h2>
+  <p>Under the GDPR you have the right to:</p>
+  <ul>
+    <li><strong>Access</strong> — request a copy of data we hold about you</li>
+    <li><strong>Rectification</strong> — request correction of inaccurate data</li>
+    <li><strong>Erasure</strong> — request deletion of your data</li>
+    <li><strong>Restriction</strong> — request that we limit processing of your data</li>
+    <li><strong>Objection</strong> — object to processing based on legitimate interest</li>
+    <li><strong>Portability</strong> — receive your data in a structured, machine-readable format</li>
+    <li><strong>Withdraw consent</strong> — withdraw your cookie consent at any time (see below)</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a>. We will respond within 30 days.</p>
+  <p>You also have the right to lodge a complaint with the Polish data protection authority (UODO): <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a></p>
+
+  <h2>7. Withdrawing Consent</h2>
+  <p>To withdraw your cookie consent, clear your browser's localStorage for evilmerge.dev (browser Settings &rarr; Privacy &rarr; Site data, or use developer tools). The cookie banner will reappear and Google Analytics will not load until you accept again.</p>
+  <p>You can also opt out of Google Analytics tracking globally using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a>.</p>
+
+  <h2>8. Cookies</h2>
+  <p>We do not set any cookies directly. Google Analytics sets cookies on our behalf (e.g. <code>_ga</code>, <code>_ga_*</code>) only after you accept via the cookie banner. These cookies identify unique sessions for analytics purposes and expire after 13–24 months.</p>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>We may update this policy. The date at the top of this page reflects the latest revision. Continued use of the site after changes constitutes acceptance of the updated policy.</p>
+</main>
+
+<footer>
+  &copy; 2026 Evil Merge Detector &mdash; <a href="/">Home</a>
+</footer>
 </body>
 </html>
 `
