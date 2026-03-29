@@ -57,6 +57,21 @@ func (s *Store) Migrate(ctx context.Context) error {
 
 		ALTER TABLE installations
 			ADD COLUMN IF NOT EXISTS last_full_scan_at TIMESTAMPTZ;
+
+		DO $$
+		BEGIN
+			IF NOT EXISTS (
+				SELECT 1 FROM pg_constraint WHERE conname = 'scans_installation_id_fk'
+			) THEN
+				DELETE FROM scans
+					WHERE installation_id NOT IN (SELECT installation_id FROM installations);
+				ALTER TABLE scans
+					ADD CONSTRAINT scans_installation_id_fk
+					FOREIGN KEY (installation_id) REFERENCES installations(installation_id)
+					ON DELETE CASCADE;
+			END IF;
+		END
+		$$;
 	`)
 	return err
 }

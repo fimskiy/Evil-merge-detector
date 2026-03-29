@@ -38,10 +38,3 @@ brews:
     test: |
       system "#{bin}/evilmerge", "version"
 
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
-      - "^ci:"

@@ -9,35 +9,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- HTTP security headers middleware (X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy, CSP)
-- Per-IP rate limiting (100 req/min, CF-Connecting-IP aware)
-- OAuth state cookie SameSite=Lax; session cookie SameSite=Strict
-- `crypto/rand` error checked in `randomState()` — predictable state prevented
+**Server**
+- HTTP security headers middleware — X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy, Content-Security-Policy
+- Per-IP rate limiting — fixed-window 100 req/min, CF-Connecting-IP aware, background cleanup
 - Graceful shutdown on SIGTERM/SIGINT with 30s drain; HTTP IdleTimeout=120s
+
+**Auth**
+- OAuth state cookie: explicit SameSite=Lax; session cookie: SameSite=Strict in both Set and Clear
+- `crypto/rand` error now checked in `randomState()` — prevented predictable zero-byte state token
 
 ### Fixed
 
-- Goroutine leak in history scan — missing `wg.Wait()` could write to destroyed channel
-- Marketplace webhook used `account.GetID()` (user ID) instead of installation ID — Pro plan was never applied
-- Dashboard template rendered to `w` before error check; now uses `bytes.Buffer`
-- `TotalMerges` counted the commit that triggered the scan limit
-- Removed dead `worker.NewGitHubClient()`
-- Webhook switch missing `default` — unknown event types now logged
-- Annual pricing "Save 20%" showed $56 instead of $67
+**GitHub App**
+- Goroutine leak in history scan — missing `wg.Wait()` could write to a destroyed semaphore channel
+- Marketplace webhook used `account.GetID()` (GitHub user ID) instead of installation ID — Pro plan was never applied to the correct record
+- Webhook event switch missing `default` — unknown event types now logged instead of silently dropped
+
+**Dashboard**
+- Template rendered directly to `w` before error check; switched to `bytes.Buffer` — partial HTML with status 200 on error is no longer possible
+
+**Scanner**
+- `TotalMerges` counter incremented before limit check — last unanalyzed commit was included in the count; moved after the check
+
+**Landing**
+- Annual pricing "Save 20%" displayed $56 (33% off) instead of $67 (correct 20% off $84/yr)
+
+**Dead code**
+- Removed unused exported `worker.NewGitHubClient()` and its orphaned import
 
 ### Added
 
-- Dashboard notice when GitHub App is not installed
-- GDPR: Data Controller name in Privacy Policy; one-click consent revoke on /privacy
-- Accessibility: focus trap on cookie banner, `aria-modal`, `aria-pressed`, `aria-hidden` on cursor span
-- Tests for `session`, `oauth`, `dashboard` packages
-- OG image at `/og-image.png`
-- Landing page SEO: OG tags, Twitter Card, schema.org JSON-LD, canonical URL
+**GitHub App**
+- Dashboard shows an "App not installed" notice with install link when `InstallationID == 0`
+
+**GDPR**
+- Privacy Policy now identifies the Data Controller by name (GDPR Art. 13(1)(a))
+- One-click "Revoke cookie consent" button on `/privacy` (GDPR Art. 7(3))
+
+**Accessibility**
+- Cookie banner captures keyboard focus on show via `requestAnimationFrame`
+- `aria-modal="true"` on cookie dialog, `aria-pressed` on billing toggle, `aria-hidden="true"` on decorative cursor span
+
+**Tests**
+- New test packages: `session` (round-trip, tampered payload, Clear), `oauth` (randomState uniqueness, cookie attrs, invalid state), `dashboard` (redirect, render, wrong secret)
+
+**Landing**
+- OG image served at `/og-image.png` via embed
+- SEO: Open Graph tags, Twitter Card, schema.org JSON-LD, canonical URL, improved H1
 
 ### Changed
 
-- Domain: `evilmerge.dev`
-- Landing page redesigned with coming-soon overlay
+- Domain switched to `evilmerge.dev`
+- Landing page redesigned: minimal variant with coming-soon overlay, improved typography and accessibility
 
 ## [0.1.5] - 2026-03-27
 
