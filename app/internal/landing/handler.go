@@ -108,6 +108,7 @@ var page = `<!DOCTYPE html>
     "Supply chain attack prevention",
     "Code injection detection via git merge history",
     "Git security scanning",
+    "Detects GitHub-acknowledged design vulnerability in PR merge workflow",
     "Zero false positives",
     "CLI tool",
     "GitHub Action",
@@ -1350,6 +1351,7 @@ footer {
         <p>GitHub&rsquo;s PR diff doesn&rsquo;t show merge commits. <code>git log</code> doesn&rsquo;t surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
         <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> &mdash; on every developer machine and every CI build.</p>
         <p>It&rsquo;s a <strong>supply chain attack</strong> via code injection &mdash; and it bypasses every standard git security tool.</p>
+        <p>GitHub has confirmed this is an <strong>intentional design decision</strong> and does not plan to fix it. The responsibility falls entirely on your team to detect it.</p>
       </div>
 
       <div class="diff-card reveal">
@@ -1528,6 +1530,10 @@ evilmerge scan .</pre>
       <details class="faq-item reveal">
         <summary class="faq-q">Does it work with GitLab or Bitbucket?</summary>
         <p class="faq-a">The CLI works with any Git repository regardless of host. Ready-to-use CI templates for GitLab CI and Bitbucket Pipelines are available in the repository. The GitHub App and GitHub Checks integration are GitHub-only.</p>
+      </details>
+      <details class="faq-item reveal">
+        <summary class="faq-q">Doesn&rsquo;t enabling &ldquo;Dismiss stale reviews&rdquo; prevent this?</summary>
+        <p class="faq-a">Partially &mdash; and only going forward. &ldquo;Dismiss stale reviews&rdquo; forces re-review when new commits are pushed, which makes the attack harder to execute. But it doesn&rsquo;t scan your existing history for past injections, requires manual setup on every repository, and can be changed by any admin at any time. GitHub themselves confirmed this attack vector is <strong>working as designed</strong> and has no plans to address it &mdash; making detection, not just prevention, essential.</p>
       </details>
       <details class="faq-item reveal">
         <summary class="faq-q">What happens when I exceed 50 scans on the Free plan?</summary>
