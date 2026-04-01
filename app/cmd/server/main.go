@@ -196,7 +196,7 @@ func secureHeaders(next http.Handler) http.Handler {
 				"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "+
 				"font-src https://fonts.gstatic.com; "+
 				"img-src 'self' data: https://evilmerge.dev; "+
-				"connect-src 'self' https://www.google-analytics.com; "+
+				"connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; "+
 				"frame-ancestors 'none'")
 		next.ServeHTTP(w, r)
 	})
