@@ -61,8 +61,7 @@ var page = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Detect Evil Merge Commits in Git — Evil Merge Detector</title>
 <meta name="description" content="Detect code injection via Git merge commits — a supply chain attack vector invisible to standard git security tools. CLI, GitHub Action, and GitHub App. Free for open source.">
-<meta name="robots" content="noindex, nofollow">
-<meta name="googlebot" content="noindex, nofollow">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <link rel="canonical" href="https://evilmerge.dev/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Detect Evil Merge Commits in Git — Evil Merge Detector">
