@@ -11,21 +11,24 @@ import (
 )
 
 type Handler struct {
-	secret []byte
-	db     *store.Store
-	tmpl   *template.Template
+	secret         []byte
+	db             *store.Store
+	tmpl           *template.Template
+	billingEnabled bool
 }
 
-func New(secret []byte, db *store.Store) *Handler {
+func New(secret []byte, db *store.Store, billingEnabled bool) *Handler {
 	tmpl := template.Must(template.New("dashboard").Parse(dashboardTmpl))
-	return &Handler{secret: secret, db: db, tmpl: tmpl}
+	return &Handler{secret: secret, db: db, tmpl: tmpl, billingEnabled: billingEnabled}
 }
 
 type pageData struct {
-	Login        string
-	Plan         string
-	Scans        []store.ScanRecord
-	AppInstalled bool
+	Login          string
+	Plan           string
+	Scans          []store.ScanRecord
+	AppInstalled   bool
+	BillingEnabled bool
+	Upgraded       bool
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +38,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := pageData{Login: sess.GitHubLogin, AppInstalled: sess.InstallationID != 0}
+	data := pageData{
+		Login:          sess.GitHubLogin,
+		AppInstalled:   sess.InstallationID != 0,
+		BillingEnabled: h.billingEnabled,
+		Upgraded:       r.URL.Query().Get("upgraded") == "1",
+	}
 
 	if h.db != nil && sess.InstallationID != 0 {
 		inst, err := h.db.GetInstallation(r.Context(), sess.InstallationID)
@@ -80,6 +88,16 @@ h2 { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
 .empty { color: #8b949e; font-size: 14px; padding: 40px 0; text-align: center; }
 .install-notice { background: #1c2128; border: 1px solid #388bfd; border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; font-size: 14px; color: #e6edf3; }
 .install-notice a { color: #58a6ff; }
+.upgrade-banner { background: #1c2128; border: 1px solid #30363d; border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.upgrade-banner p { font-size: 14px; color: #8b949e; margin: 0; }
+.upgrade-banner strong { color: #e6edf3; }
+.upgrade-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-upgrade { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; }
+.btn-upgrade:hover { background: #2ea043; }
+.btn-upgrade.secondary { background: transparent; border: 1px solid #30363d; color: #8b949e; }
+.btn-upgrade.secondary:hover { color: #e6edf3; border-color: #8b949e; }
+.success-banner { background: #0f2a1a; border: 1px solid #238636; border-radius: 8px; padding: 16px 24px; margin-bottom: 32px; font-size: 14px; color: #3fb950; }
+.manage-link { font-size: 13px; color: #8b949e; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; padding: 8px 12px; color: #8b949e; font-weight: 500; border-bottom: 1px solid #21262d; }
 td { padding: 10px 12px; border-bottom: 1px solid #21262d; vertical-align: middle; }
@@ -103,12 +121,39 @@ tr:hover td { background: #161b22; }
   </div>
 </header>
 <main>
+  {{if .Upgraded}}
+  <div class="success-banner">&#10003; Upgraded to Pro — thank you! Your account now has unlimited scans.</div>
+  {{end}}
   {{if not .AppInstalled}}
   <div class="install-notice">
     GitHub App is not installed for your account yet.
     <a href="https://github.com/apps/evil-merge-detector" target="_blank" rel="noopener">Install it</a>
     to start scanning pull requests automatically.
   </div>
+  {{end}}
+  {{if and .BillingEnabled .AppInstalled}}
+  {{if eq .Plan "free"}}
+  <div class="upgrade-banner">
+    <p><strong>Free plan</strong> — 50 PR scans per month. Upgrade to Pro for unlimited scans on private repositories.</p>
+    <div class="upgrade-actions">
+      <form method="POST" action="/billing/checkout" style="display:inline">
+        <input type="hidden" name="period" value="monthly">
+        <button type="submit" class="btn-upgrade">Upgrade $7/mo</button>
+      </form>
+      <form method="POST" action="/billing/checkout" style="display:inline">
+        <input type="hidden" name="period" value="yearly">
+        <button type="submit" class="btn-upgrade secondary">$67/yr</button>
+      </form>
+    </div>
+  </div>
+  {{end}}
+  {{if eq .Plan "pro"}}
+  <div style="margin-bottom:24px">
+    <form method="POST" action="/billing/portal" style="display:inline">
+      <button type="submit" class="btn-upgrade secondary manage-link">Manage subscription</button>
+    </form>
+  </div>
+  {{end}}
   {{end}}
   <h2>Recent scans</h2>
   {{if not .Scans}}

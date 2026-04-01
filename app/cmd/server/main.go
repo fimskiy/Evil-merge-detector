@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/badge"
+	"github.com/fimskiy/evil-merge-detector/app/internal/billing"
 	"github.com/fimskiy/evil-merge-detector/app/internal/config"
 	"github.com/fimskiy/evil-merge-detector/app/internal/dashboard"
 	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
@@ -57,6 +58,13 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/webhook", webhook.New(cfg, db, ntf))
+
+	if cfg.StripeSecretKey != "" && db != nil {
+		bh := billing.New(cfg.StripeSecretKey, cfg.StripePriceMonthly, cfg.StripePriceYearly, cfg.StripeWebhookSecret, cfg.SessionSecret, db)
+		mux.HandleFunc("/billing/checkout", bh.Checkout)
+		mux.HandleFunc("/billing/portal", bh.Portal)
+		mux.HandleFunc("/billing/webhook", bh.Webhook)
+	}
 	// Pass nil interface (not nil *store.Store) when DB is unavailable.
 	var badgeStore badge.ScanStore
 	if db != nil {
@@ -71,7 +79,7 @@ func main() {
 	mux.HandleFunc("/auth/github", oauthHandler.Login)
 	mux.HandleFunc("/auth/callback", oauthHandler.Callback)
 	mux.HandleFunc("/auth/logout", oauthHandler.Logout)
-	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db))
+	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db, cfg.StripeSecretKey != ""))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			landing.Handler(w, r)

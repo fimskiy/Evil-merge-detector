@@ -58,6 +58,9 @@ func (s *Store) Migrate(ctx context.Context) error {
 		ALTER TABLE installations
 			ADD COLUMN IF NOT EXISTS last_full_scan_at TIMESTAMPTZ;
 
+		ALTER TABLE installations
+			ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+
 		DO $$
 		BEGIN
 			IF NOT EXISTS (

@@ -99,6 +99,35 @@ func (s *Store) ListPendingFullScans(ctx context.Context) ([]Installation, error
 	return list, rows.Err()
 }
 
+func (s *Store) GetStripeCustomerID(ctx context.Context, installationID int64) (string, error) {
+	var id string
+	err := s.pool.QueryRow(ctx,
+		`SELECT COALESCE(stripe_customer_id, '') FROM installations WHERE installation_id = $1`,
+		installationID).Scan(&id)
+	return id, err
+}
+
+func (s *Store) UpdateStripeCustomer(ctx context.Context, installationID int64, customerID string) error {
+	_, err := s.pool.Exec(ctx,
+		`UPDATE installations SET stripe_customer_id = $1, updated_at = NOW() WHERE installation_id = $2`,
+		customerID, installationID)
+	return err
+}
+
+func (s *Store) GetInstallationByStripeCustomer(ctx context.Context, customerID string) (*Installation, error) {
+	row := s.pool.QueryRow(ctx, `
+		SELECT installation_id, account_login, account_type, plan, installed_at, updated_at
+		FROM installations WHERE stripe_customer_id = $1
+	`, customerID)
+	var inst Installation
+	err := row.Scan(&inst.InstallationID, &inst.AccountLogin, &inst.AccountType,
+		&inst.Plan, &inst.InstalledAt, &inst.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &inst, nil
+}
+
 func (s *Store) MarkFullScanned(ctx context.Context, installationID int64) error {
 	_, err := s.pool.Exec(ctx, `
 		UPDATE installations SET last_full_scan_at = NOW()

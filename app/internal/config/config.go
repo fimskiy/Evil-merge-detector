@@ -17,6 +17,10 @@ type Config struct {
 	SessionSecret      []byte
 	NotificationWebhookURL string
 	SlackWebhookURL        string
+	StripeSecretKey        string
+	StripePriceMonthly     string
+	StripePriceYearly      string
+	StripeWebhookSecret    string
 }
 
 func Load() (*Config, error) {
@@ -69,5 +73,9 @@ func Load() (*Config, error) {
 		SessionSecret:          []byte(sessionSecret),
 		NotificationWebhookURL: os.Getenv("NOTIFICATION_WEBHOOK_URL"),
 		SlackWebhookURL:        os.Getenv("SLACK_WEBHOOK_URL"),
+		StripeSecretKey:        os.Getenv("STRIPE_SECRET_KEY"),
+		StripePriceMonthly:     os.Getenv("STRIPE_PRICE_MONTHLY"),
+		StripePriceYearly:      os.Getenv("STRIPE_PRICE_YEARLY"),
+		StripeWebhookSecret:    os.Getenv("STRIPE_WEBHOOK_SECRET"),
 	}, nil
 }
