@@ -28,7 +28,7 @@ checksum:
 brews:
   - name: evilmerge
     repository:
-      owner: fimskiy
+      owner: evilmerge-dev
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: "https://evilmerge.dev"
