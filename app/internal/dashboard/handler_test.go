@@ -12,7 +12,7 @@ import (
 var testSecret = []byte("test-secret-32-bytes-long-enough!")
 
 func TestServeHTTP_redirectsWhenNoSession(t *testing.T) {
-	h := New(testSecret, nil)
+	h := New(testSecret, nil, false)
 	r := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
 	w := httptest.NewRecorder()
 
@@ -27,7 +27,7 @@ func TestServeHTTP_redirectsWhenNoSession(t *testing.T) {
 }
 
 func TestServeHTTP_rendersWithValidSession(t *testing.T) {
-	h := New(testSecret, nil)
+	h := New(testSecret, nil, false)
 
 	// Build a request with a valid signed session cookie
 	setCookieResp := httptest.NewRecorder()
@@ -55,7 +55,7 @@ func TestServeHTTP_wrongSecretRedirects(t *testing.T) {
 	session.Set(setCookieResp, &session.Data{GitHubLogin: "alice"}, []byte("other-secret-value-here-is-long!"))
 	cookies := setCookieResp.Result().Header["Set-Cookie"]
 
-	h := New(testSecret, nil)
+	h := New(testSecret, nil, false)
 	r := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
 	r.Header["Cookie"] = cookies
 	w := httptest.NewRecorder()
