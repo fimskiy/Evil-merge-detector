@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/badge"
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
+	"github.com/fimskiy/evil-merge-detector/app/internal/badge"
+	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 )
 
 type mockStore struct {

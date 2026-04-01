@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
+	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 )
 
 func testDB(t *testing.T) *store.Store {

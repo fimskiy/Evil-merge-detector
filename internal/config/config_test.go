@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/config"
+	"github.com/fimskiy/evil-merge-detector/internal/config"
 )
 
 func TestLoad_NoFile(t *testing.T) {

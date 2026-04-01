@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/scanner"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/scanner"
 )
 
 func setupTestRepo(t *testing.T) string {

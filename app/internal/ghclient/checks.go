@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-github/v84/github"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
 )
 
 const checkName = "Evil Merge Detector"

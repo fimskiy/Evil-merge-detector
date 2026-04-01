@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/fatih/color"
 )
 

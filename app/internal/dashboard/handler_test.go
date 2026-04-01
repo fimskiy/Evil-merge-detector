@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/session"
+	"github.com/fimskiy/evil-merge-detector/app/internal/session"
 )
 
 var testSecret = []byte("test-secret-32-bytes-long-enough!")

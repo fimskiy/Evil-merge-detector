@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
 )
 
 // PrintDetail writes a detailed report for a single merge commit to w.

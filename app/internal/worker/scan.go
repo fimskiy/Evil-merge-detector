@@ -7,11 +7,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/ghclient"
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/notifier"
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/scanner"
+	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
+	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
+	"github.com/fimskiy/evil-merge-detector/app/internal/store"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/scanner"
 )
 
 type PRJob struct {

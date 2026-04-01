@@ -9,9 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/config"
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/notifier"
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/webhook"
+	"github.com/fimskiy/evil-merge-detector/app/internal/config"
+	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
+	"github.com/fimskiy/evil-merge-detector/app/internal/webhook"
 )
 
 const testSecret = "test-secret"

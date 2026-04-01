@@ -116,7 +116,7 @@ var page = `<!DOCTYPE html>
     "Works offline"
   ],
   "isAccessibleForFree": true,
-  "downloadUrl": "https://github.com/evilmerge-dev/Evil-merge-detector",
+  "downloadUrl": "https://github.com/fimskiy/Evil-merge-detector",
   "installUrl": "https://github.com/apps/evil-merge-detector"
 }
 </script>
@@ -1216,7 +1216,7 @@ footer {
   <div class="nav-links">
     <a href="#how-it-works">How it works</a>
     <a href="#pricing">Pricing</a>
-    <a href="https://github.com/evilmerge-dev/Evil-merge-detector">GitHub</a>
+    <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
   </div>
   <a class="nav-cta" id="btn-nav-install" href="https://github.com/apps/evil-merge-detector">Install App</a>
   <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false">&#9776;</button>
@@ -1224,7 +1224,7 @@ footer {
 <div class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
   <a href="#how-it-works">How it works</a>
   <a href="#pricing">Pricing</a>
-  <a href="https://github.com/evilmerge-dev/Evil-merge-detector">GitHub</a>
+  <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
   <a href="https://github.com/apps/evil-merge-detector">Install App</a>
 </div>
 
@@ -1255,7 +1255,7 @@ footer {
         <a class="btn-primary" id="btn-hero-install" href="https://github.com/apps/evil-merge-detector">Start Scanning — Free</a>
         <span class="cta-note">No credit card required</span>
       </div>
-      <a class="btn-secondary link-arrow" id="btn-hero-github" href="https://github.com/evilmerge-dev/Evil-merge-detector">View on GitHub</a>
+      <a class="btn-secondary link-arrow" id="btn-hero-github" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
     </div>
 
     <div class="terminal">
@@ -1397,7 +1397,7 @@ evilmerge scan .</pre>
         <div class="int-badge action">Action</div>
         <h3>GitHub Action</h3>
         <p>Add to your workflow and get annotations directly on pull requests. Zero configuration.</p>
-        <pre>- uses: evilmerge-dev/Evil-merge-detector@v1
+        <pre>- uses: fimskiy/Evil-merge-detector@v1
   with:
     fail-on: warning</pre>
       </div>
@@ -1516,7 +1516,7 @@ evilmerge scan .</pre>
     <p class="section-sub">Install the GitHub App and start scanning automatically &mdash; no workflow changes needed.</p>
     <div class="cta-actions">
       <a class="btn-primary" id="btn-cta-install" href="https://github.com/apps/evil-merge-detector">Install GitHub App</a>
-      <a class="btn-secondary link-arrow" id="btn-cta-github" href="https://github.com/evilmerge-dev/Evil-merge-detector">View on GitHub</a>
+      <a class="btn-secondary link-arrow" id="btn-cta-github" href="https://github.com/fimskiy/Evil-merge-detector">View on GitHub</a>
     </div>
   </div>
 </section>
@@ -1525,9 +1525,9 @@ evilmerge scan .</pre>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">Evil Merge <span class="accent">Detector</span> &mdash; open source on <a href="https://github.com/evilmerge-dev/Evil-merge-detector" class="footer-gh-link link-arrow">GitHub</a></div>
+  <div class="footer-logo">Evil Merge <span class="accent">Detector</span> &mdash; open source on <a href="https://github.com/fimskiy/Evil-merge-detector" class="footer-gh-link link-arrow">GitHub</a></div>
   <div class="footer-links">
-    <a href="https://github.com/evilmerge-dev/Evil-merge-detector">Docs</a>
+    <a href="https://github.com/fimskiy/Evil-merge-detector">Docs</a>
     <a href="https://github.com/apps/evil-merge-detector">Install</a>
     <a href="/privacy">Privacy Policy</a>
   </div>

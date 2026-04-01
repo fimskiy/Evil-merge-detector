@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/detector"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/detector"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )

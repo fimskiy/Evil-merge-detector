@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
+	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 )
 
 // ScanStore is the subset of store.Store required by the badge handler.

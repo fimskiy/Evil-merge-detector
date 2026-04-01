@@ -1,4 +1,4 @@
-module github.com/evilmerge-dev/evil-merge-detector
+module github.com/fimskiy/evil-merge-detector
 
 go 1.25.0
 

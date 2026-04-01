@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )

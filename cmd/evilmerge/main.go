@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/evilmerge-dev/evil-merge-detector/internal/config"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/reporter"
-	"github.com/evilmerge-dev/evil-merge-detector/internal/scanner"
+	"github.com/fimskiy/evil-merge-detector/internal/config"
+	"github.com/fimskiy/evil-merge-detector/internal/models"
+	"github.com/fimskiy/evil-merge-detector/internal/reporter"
+	"github.com/fimskiy/evil-merge-detector/internal/scanner"
 	"github.com/spf13/cobra"
 )
 
