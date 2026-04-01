@@ -1217,6 +1217,7 @@ footer {
     <a href="#how-it-works">How it works</a>
     <a href="#pricing">Pricing</a>
     <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
+    <a href="/dashboard">Dashboard</a>
   </div>
   <a class="nav-cta" id="btn-nav-install" href="https://github.com/apps/evil-merge-detector">Install App</a>
   <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false">&#9776;</button>
@@ -1225,6 +1226,7 @@ footer {
   <a href="#how-it-works">How it works</a>
   <a href="#pricing">Pricing</a>
   <a href="https://github.com/fimskiy/Evil-merge-detector">GitHub</a>
+  <a href="/dashboard">Dashboard</a>
   <a href="https://github.com/apps/evil-merge-detector">Install App</a>
 </div>
 
