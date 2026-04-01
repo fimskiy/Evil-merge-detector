@@ -35,7 +35,7 @@ func Set(w http.ResponseWriter, d *Data, secret []byte) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(30 * 24 * time.Hour),
 	})
 }
