@@ -1204,43 +1204,9 @@ footer {
   #cookie-banner { flex-direction: column; align-items: flex-start; padding: 16px 20px; gap: 12px; }
 }
 
-/* COMING SOON */
-#coming-soon {
-  position: fixed;
-  inset: 0;
-  z-index: 700;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: rgba(255,255,255,0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-#coming-soon .terminal {
-  animation: terminalEntrance 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-  max-width: 360px;
-  width: 100%;
-}
-#coming-soon .terminal-body { min-height: auto; }
 </style>
 </head>
 <body{{if .ShowCookieBanner}} data-eu="1"{{end}}>
-
-<div id="coming-soon" aria-live="polite">
-  <div class="terminal">
-    <div class="terminal-bar">
-      <span class="dot-r" aria-hidden="true"></span>
-      <span class="dot-y" aria-hidden="true"></span>
-      <span class="dot-g" aria-hidden="true"></span>
-      <span class="terminal-title">evilmerge &mdash; announce</span>
-    </div>
-    <div class="terminal-body">
-      <div class="t-dim"># Something important is coming</div>
-      <div><span class="t-prompt">$ </span><span class="t-cursor">▋</span></div>
-    </div>
-  </div>
-</div>
 
 <!-- NAV -->
 <nav aria-label="Main navigation">
