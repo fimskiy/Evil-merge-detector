@@ -1316,7 +1316,7 @@ footer {
         <p>GitHub&rsquo;s PR diff doesn&rsquo;t show merge commits. <code>git log</code> doesn&rsquo;t surface the change. SAST tools scan files, not merge history. The injection is invisible.</p>
         <p>This is how malicious code ran undetected in a production repository for <strong>several months</strong> &mdash; on every developer machine and every CI build.</p>
         <p>It&rsquo;s a <strong>supply chain attack</strong> via code injection &mdash; and it bypasses every standard git security tool.</p>
-        <p>GitHub has confirmed this is an <strong>intentional design decision</strong> and does not plan to fix it. The responsibility falls entirely on your team to detect it.</p>
+        <p>GitHub&rsquo;s response: <em>&ldquo;This is an intentional design decision and is working as expected. We may make this functionality more strict in the future, but don&rsquo;t have anything to announce right now.&rdquo;</em> The responsibility to detect it falls entirely on your team.</p>
       </div>
 
       <div class="diff-card reveal">
@@ -1464,7 +1464,7 @@ evilmerge scan .</pre>
           <li><span class="check">&#10003;</span> Scan history dashboard</li>
           <li><span class="check">&#10003;</span> Priority support</li>
         </ul>
-        <a class="plan-btn" id="btn-plan-pro" href="https://github.com/marketplace/evil-merge-detector">Upgrade to Pro</a>
+        <a class="plan-btn" id="btn-plan-pro" href="/dashboard">Upgrade to Pro</a>
         <p class="plan-note">Cancel anytime · No lock-in</p>
       </div>
     </div>
