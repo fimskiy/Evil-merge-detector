@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/fimskiy/evil-merge-detector/internal/models"
+	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
 )
 
 // SARIF 2.1.0 — https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
@@ -27,42 +27,42 @@ var ruleSpecs = []ruleSpec{
 		ID:               "EMD001",
 		ShortDescription: "File silently modified in merge commit",
 		FullDescription:  "A file that was not changed in either parent branch was modified in the merge commit. This is a strong indicator of an evil merge — code injected during the merge that bypasses code review.",
-		HelpURI:          "https://github.com/fimskiy/Evil-merge-detector#severity-levels",
+		HelpURI:          "https://github.com/evilmerge-dev/Evil-merge-detector#severity-levels",
 		Level:            "error",
 	},
 	{
 		ID:               "EMD002",
 		ShortDescription: "New file introduced only in merge commit",
 		FullDescription:  "A file was added in the merge commit that did not exist in either parent branch. Files introduced this way are invisible to code reviewers.",
-		HelpURI:          "https://github.com/fimskiy/Evil-merge-detector#severity-levels",
+		HelpURI:          "https://github.com/evilmerge-dev/Evil-merge-detector#severity-levels",
 		Level:            "error",
 	},
 	{
 		ID:               "EMD003",
 		ShortDescription: "File deleted only in merge commit",
 		FullDescription:  "A file was deleted in the merge commit but existed in both parent branches. Deletions introduced this way bypass code review.",
-		HelpURI:          "https://github.com/fimskiy/Evil-merge-detector#severity-levels",
+		HelpURI:          "https://github.com/evilmerge-dev/Evil-merge-detector#severity-levels",
 		Level:            "error",
 	},
 	{
 		ID:               "EMD004",
 		ShortDescription: "Sensitive file modified in merge commit",
 		FullDescription:  "A file matching a sensitive pattern (credentials, keys, auth, crypto) was modified in the merge commit in a way not explained by either parent branch.",
-		HelpURI:          "https://github.com/fimskiy/Evil-merge-detector#severity-levels",
+		HelpURI:          "https://github.com/evilmerge-dev/Evil-merge-detector#severity-levels",
 		Level:            "error",
 	},
 	{
 		ID:               "EMD005",
 		ShortDescription: "Merge result differs unexpectedly from both parents",
 		FullDescription:  "A file was changed in one parent branch, but the merge result differs from both the changed parent and the base. This may indicate undisclosed modifications introduced during conflict resolution.",
-		HelpURI:          "https://github.com/fimskiy/Evil-merge-detector#severity-levels",
+		HelpURI:          "https://github.com/evilmerge-dev/Evil-merge-detector#severity-levels",
 		Level:            "warning",
 	},
 	{
 		ID:               "EMD006",
 		ShortDescription: "Conflict zone contains extra changes",
 		FullDescription:  "A file was modified in both parent branches (conflict zone), and the merge result contains content not present in either parent. This warrants review, though it may be legitimate conflict resolution.",
-		HelpURI:          "https://github.com/fimskiy/Evil-merge-detector#severity-levels",
+		HelpURI:          "https://github.com/evilmerge-dev/Evil-merge-detector#severity-levels",
 		Level:            "note",
 	},
 }
@@ -223,7 +223,7 @@ func (r *SARIFReporter) Report(w io.Writer, result *models.ScanResult) error {
 					Driver: sarifDriver{
 						Name:           "Evil Merge Detector",
 						Version:        r.ToolVersion,
-						InformationURI: "https://github.com/fimskiy/Evil-merge-detector",
+						InformationURI: "https://github.com/evilmerge-dev/Evil-merge-detector",
 						Rules:          rules,
 					},
 				},

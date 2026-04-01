@@ -9,11 +9,11 @@ import (
 
 	"github.com/google/go-github/v84/github"
 
-	"github.com/fimskiy/evil-merge-detector/app/internal/config"
-	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
-	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
-	"github.com/fimskiy/evil-merge-detector/app/internal/store"
-	"github.com/fimskiy/evil-merge-detector/app/internal/worker"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/config"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/ghclient"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/notifier"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/worker"
 )
 
 type Handler struct {

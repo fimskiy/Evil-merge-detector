@@ -3,7 +3,7 @@ package reporter
 import (
 	"io"
 
-	"github.com/fimskiy/evil-merge-detector/internal/models"
+	"github.com/evilmerge-dev/evil-merge-detector/internal/models"
 )
 
 // Reporter defines the interface for outputting scan results.

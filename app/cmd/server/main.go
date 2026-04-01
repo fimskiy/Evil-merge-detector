@@ -11,16 +11,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fimskiy/evil-merge-detector/app/internal/badge"
-	"github.com/fimskiy/evil-merge-detector/app/internal/config"
-	"github.com/fimskiy/evil-merge-detector/app/internal/dashboard"
-	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
-	"github.com/fimskiy/evil-merge-detector/app/internal/landing"
-	"github.com/fimskiy/evil-merge-detector/app/internal/notifier"
-	"github.com/fimskiy/evil-merge-detector/app/internal/oauth"
-	"github.com/fimskiy/evil-merge-detector/app/internal/store"
-	"github.com/fimskiy/evil-merge-detector/app/internal/webhook"
-	"github.com/fimskiy/evil-merge-detector/app/internal/worker"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/badge"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/config"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/dashboard"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/ghclient"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/landing"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/notifier"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/oauth"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/webhook"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/worker"
 )
 
 func main() {

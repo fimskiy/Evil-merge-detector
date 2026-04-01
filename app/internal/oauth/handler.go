@@ -12,8 +12,8 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 
-	"github.com/fimskiy/evil-merge-detector/app/internal/session"
-	"github.com/fimskiy/evil-merge-detector/app/internal/store"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/session"
+	"github.com/evilmerge-dev/evil-merge-detector/app/internal/store"
 )
 
 type Handler struct {

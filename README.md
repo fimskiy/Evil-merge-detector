@@ -1,7 +1,7 @@
 # Evil Merge Detector
 
-[![CI](https://github.com/fimskiy/Evil-merge-detector/actions/workflows/ci.yml/badge.svg)](https://github.com/fimskiy/Evil-merge-detector/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/fimskiy/evil-merge-detector)](https://goreportcard.com/report/github.com/fimskiy/evil-merge-detector)
+[![CI](https://github.com/evilmerge-dev/Evil-merge-detector/actions/workflows/ci.yml/badge.svg)](https://github.com/evilmerge-dev/Evil-merge-detector/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/evilmerge-dev/evil-merge-detector)](https://goreportcard.com/report/github.com/evilmerge-dev/evil-merge-detector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/fimskiy)
 
@@ -32,10 +32,10 @@ brew install fimskiy/tap/evilmerge
 
 **Go:**
 ```sh
-go install github.com/fimskiy/evil-merge-detector/cmd/evilmerge@latest
+go install github.com/evilmerge-dev/evil-merge-detector/cmd/evilmerge@latest
 ```
 
-**Binary:** download from [Releases](https://github.com/fimskiy/Evil-merge-detector/releases)
+**Binary:** download from [Releases](https://github.com/evilmerge-dev/Evil-merge-detector/releases)
 
 ## Usage
 
@@ -129,7 +129,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: fimskiy/Evil-merge-detector@v1
+      - uses: evilmerge-dev/Evil-merge-detector@v1
         with:
           fail-on: warning
 ```
@@ -155,7 +155,7 @@ jobs:
 ### With SARIF upload
 
 ```yaml
-- uses: fimskiy/Evil-merge-detector@v1
+- uses: evilmerge-dev/Evil-merge-detector@v1
   with:
     fail-on: warning
     upload-sarif: true
@@ -180,7 +180,7 @@ If you prefer to install the binary directly:
 ```yaml
 - name: Check for evil merges
   run: |
-    go install github.com/fimskiy/evil-merge-detector/cmd/evilmerge@latest
+    go install github.com/evilmerge-dev/evil-merge-detector/cmd/evilmerge@latest
     evilmerge scan --branch=main --fail-on=warning
 ```
 
