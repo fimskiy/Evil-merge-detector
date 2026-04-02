@@ -1767,7 +1767,7 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
   <p class="updated">Last updated: March 28, 2026</p>
 
   <h2>1. Data Controller</h2>
-  <p>Evil Merge Detector (evilmerge.dev), operated by Dmitrii Fimskiy. For any privacy-related requests, contact: <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a></p>
+  <p>Evil Merge Detector (evilmerge.dev), operated by Fimskiy. For any privacy-related requests, contact: <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a></p>
 
   <h2>2. What Data We Collect</h2>
   <p>We use Google Analytics (via Google Tag Manager) to understand how visitors use this site. Google Analytics collects:</p>
