@@ -53,6 +53,15 @@ func PrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var termsTmpl = template.Must(template.New("terms").Parse(termsPage))
+
+func TermsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := termsTmpl.Execute(w, nil); err != nil {
+		log.Printf("terms template: %v", err)
+	}
+}
+
 var page = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1532,6 +1541,7 @@ evilmerge scan .</pre>
     <a href="https://github.com/fimskiy/Evil-merge-detector">Docs</a>
     <a href="https://github.com/apps/evil-merge-detector">Install</a>
     <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
   </div>
 </footer>
 
@@ -1820,7 +1830,144 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
 </main>
 
 <footer>
-  &copy; 2026 Evil Merge Detector &mdash; <a href="/">Home</a>
+  &copy; 2026 Evil Merge Detector &mdash; <a href="/">Home</a> &middot; <a href="/terms">Terms of Service</a>
+</footer>
+</body>
+</html>
+`
+
+var termsPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service — Evil Merge Detector</title>
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://evilmerge.dev/terms">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16 2L28 6L28 18C28 24 22 29 16 31C10 29 4 24 4 18L4 6Z' fill='%23dc2626'/%3E%3Cpath d='M16 5L26 8.5L26 18C26 23 21 27 16 29C11 27 6 23 6 18L6 8.5Z' fill='%23b91c1c'/%3E%3Ccircle cx='16' cy='12' r='2.5' fill='white'/%3E%3Ccircle cx='11' cy='17' r='2' fill='white'/%3E%3Ccircle cx='16' cy='22' r='2.2' fill='white'/%3E%3Ccircle cx='21' cy='17' r='2.5' fill='%237f1d1d'/%3E%3Cline x1='20' y1='16' x2='22' y2='18' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='22' y1='16' x2='20' y2='18' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --border: #e2e8f0;
+  --red: #dc2626;
+  --text: #0f172a;
+  --text-mid: #334155;
+  --text-muted: #64748b;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+a { color: var(--red); text-decoration: none; }
+a:hover { text-decoration: underline; }
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 60px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); display: flex; align-items: center; gap: 10px; }
+.nav-logo svg { width: 32px; height: 32px; flex-shrink: 0; }
+.accent { color: var(--red); }
+main { max-width: 720px; margin: 0 auto; padding: 64px 24px 96px; }
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+.updated { color: var(--text-muted); font-size: 14px; margin-bottom: 48px; }
+h2 { font-size: 1.1rem; font-weight: 600; margin-top: 40px; margin-bottom: 12px; }
+p { color: var(--text-mid); margin-bottom: 16px; }
+ul { color: var(--text-mid); padding-left: 20px; margin-bottom: 16px; }
+li { margin-bottom: 6px; }
+footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+@media (max-width: 640px) { nav { padding: 0 20px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M16 2L28 6L28 18C28 24 22 29 16 31C10 29 4 24 4 18L4 6Z" fill="#dc2626"/>
+      <path d="M16 5L26 8.5L26 18C26 23 21 27 16 29C11 27 6 23 6 18L6 8.5Z" fill="#b91c1c"/>
+      <circle cx="16" cy="12" r="2.5" fill="white"/>
+      <circle cx="11" cy="17" r="2" fill="white"/>
+      <circle cx="16" cy="22" r="2.2" fill="white"/>
+      <circle cx="21" cy="17" r="2.5" fill="#7f1d1d"/>
+      <line x1="20" y1="16" x2="22" y2="18" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="22" y1="16" x2="20" y2="18" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    <span>Evil Merge <span class="accent">Detector</span></span>
+  </a>
+</nav>
+
+<main>
+  <h1>Terms of Service</h1>
+  <p class="updated">Last updated: May 10, 2026</p>
+
+  <p>These Terms of Service (the &ldquo;Terms&rdquo;) govern your access to and use of the Evil Merge Detector hosted service available at <a href="https://evilmerge.dev">evilmerge.dev</a>, the GitHub App listed at <a href="https://github.com/apps/evil-merge-detector">github.com/apps/evil-merge-detector</a>, and the related dashboard, badges, and APIs (together, the &ldquo;Service&rdquo;). By installing the GitHub App or using the Service in any way, you agree to these Terms. If you do not agree, do not install the App and do not use the Service.</p>
+
+  <h2>1. Provider</h2>
+  <p>The Service is operated by Fimskiy (the &ldquo;Provider&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;). For any legal or contractual matter, contact <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a>.</p>
+
+  <h2>2. The Service</h2>
+  <p>The Service scans pull requests in repositories where the GitHub App has been installed and reports merge commits whose content cannot be reproduced by a clean three-way merge of the parent commits (&ldquo;evil merges&rdquo;). Findings are posted as GitHub Check Runs on the pull request and, on paid plans, retained in a scan history dashboard.</p>
+  <p>The Service is provided as-is. We do not guarantee that every evil merge will be detected, that every reported finding represents a real attack, or that the Service will be uninterrupted or error-free.</p>
+  <p>The detection engine is also distributed as an open-source CLI and GitHub Action under the MIT license. Use of those distributions is governed by the MIT license, not these Terms.</p>
+
+  <h2>3. Eligibility and Account</h2>
+  <p>You must be at least 16 years old and have authority to bind the GitHub user or organization on whose behalf you install the App. You authenticate to the dashboard through GitHub OAuth; we do not store GitHub passwords. You are responsible for the actions taken under your GitHub identity while using the Service.</p>
+
+  <h2>4. Plans, Fees, and Billing</h2>
+  <ul>
+    <li><strong>Free plan</strong> &mdash; available for public repositories, with up to 50 pull-request scans per organization per calendar month.</li>
+    <li><strong>Pro plan</strong> &mdash; USD 7 per organization per month, billed monthly in advance through GitHub Marketplace or, where offered, through Stripe. Pro adds private-repository support, removes the scan limit, and unlocks the scan history dashboard and Slack / webhook / email notifications.</li>
+  </ul>
+  <p>Subscriptions renew automatically until cancelled. You may cancel at any time from GitHub Marketplace (or, where applicable, the Stripe customer portal); cancellation takes effect at the end of the current billing period and you retain access until that date. Fees already paid are non-refundable except where required by applicable law (in particular, mandatory consumer-protection rights under EU law are not affected by these Terms).</p>
+  <p>Prices may change. We will give you reasonable advance notice (at least 30 days) before any price increase takes effect on your subscription, and you may cancel before the change applies.</p>
+
+  <h2>5. Acceptable Use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Use the Service to scan repositories you do not own or do not have written permission to analyse;</li>
+    <li>Reverse engineer, decompile, or attempt to extract the source code of the hosted Service (this does not restrict your rights to the open-source CLI / Action under MIT);</li>
+    <li>Probe, attack, or disrupt the availability of the Service, including by abusing rate limits, sending malformed payloads, or attempting to bypass authentication;</li>
+    <li>Resell, sublicense, or offer the Service to third parties as a standalone product;</li>
+    <li>Use the Service in violation of any applicable law, GitHub&rsquo;s Terms of Service, or the rights of a third party.</li>
+  </ul>
+  <p>We may suspend or terminate access immediately if we reasonably believe you are violating this section.</p>
+
+  <h2>6. Your Content and Permissions</h2>
+  <p>The Service requires read access to your repository code, pull requests, and metadata, and write access to GitHub Check Runs in order to post findings. We process this content only to operate the Service: scanning merge commits, generating check output, and (on Pro) storing scan results in the dashboard. We do not use your code to train any machine-learning model and we do not share it with third parties except as described in our Privacy Policy.</p>
+  <p>You retain all rights to your code and metadata. You grant us a limited, non-exclusive licence to access and process them solely as needed to provide the Service.</p>
+
+  <h2>7. Privacy</h2>
+  <p>Our collection and use of personal data is described in the <a href="/privacy">Privacy Policy</a>, which forms part of these Terms.</p>
+
+  <h2>8. Intellectual Property</h2>
+  <p>The hosted Service, the dashboard, the website, the brand, and all related materials are owned by the Provider and protected by applicable intellectual-property laws. Subject to these Terms, we grant you a limited, non-exclusive, non-transferable right to use the Service for its intended purpose. The open-source CLI and GitHub Action remain available under the MIT licence at <a href="https://github.com/fimskiy/Evil-merge-detector">github.com/fimskiy/Evil-merge-detector</a>.</p>
+
+  <h2>9. Disclaimer of Warranties</h2>
+  <p>To the maximum extent permitted by law, the Service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the Service will detect every malicious merge, that findings will be free of false positives, or that scanning results are sufficient on their own to secure your supply chain.</p>
+
+  <h2>10. Limitation of Liability</h2>
+  <p>To the maximum extent permitted by law, the Provider&rsquo;s aggregate liability arising out of or related to these Terms or the Service is limited to the greater of (a) the fees you paid for the Service in the twelve (12) months preceding the event giving rise to the claim, or (b) USD 100. We are not liable for indirect, incidental, special, consequential, or punitive damages, or for loss of profits, revenue, data, or goodwill, even if advised of the possibility of such damages. Nothing in these Terms limits liability that cannot be limited under applicable law (such as liability for gross negligence, wilful misconduct, or rights of consumers under EU law).</p>
+
+  <h2>11. Termination</h2>
+  <p>You may stop using the Service at any time by uninstalling the GitHub App and, where applicable, cancelling your paid subscription. We may suspend or terminate your access if you breach these Terms or if continued provision of the Service to you would expose us to legal or security risk. On termination, sections that by their nature should survive (in particular sections 8&ndash;10) will survive.</p>
+
+  <h2>12. Changes to These Terms</h2>
+  <p>We may update these Terms from time to time. The &ldquo;Last updated&rdquo; date at the top of this page reflects the latest revision. For material changes affecting paid users we will give reasonable advance notice (e.g. by email or in-product notice). Continued use of the Service after changes take effect constitutes acceptance of the revised Terms.</p>
+
+  <h2>13. Governing Law</h2>
+  <p>These Terms are governed by the laws of the Republic of Poland, without regard to its conflict-of-laws rules. Any dispute arising out of or in connection with these Terms will be submitted to the exclusive jurisdiction of the competent courts in Poland, except that where you act as a consumer the mandatory consumer-protection rules of your country of residence apply.</p>
+
+  <h2>14. Contact</h2>
+  <p>Questions about these Terms can be sent to <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a>.</p>
+</main>
+
+<footer>
+  &copy; 2026 Evil Merge Detector &mdash; <a href="/">Home</a> &middot; <a href="/privacy">Privacy Policy</a>
 </footer>
 </body>
 </html>
