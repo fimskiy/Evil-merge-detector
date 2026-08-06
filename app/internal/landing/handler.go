@@ -1427,7 +1427,7 @@ evilmerge scan .</pre>
     <p class="section-sub">The CLI, GitHub Action, and GitHub App are all free and open source &mdash; no plans, no limits, no credit card.</p>
 
     <div class="pricing-wrap" style="grid-template-columns: 1fr; max-width: 360px;">
-      <div class="plan featured reveal">
+      <div class="plan reveal">
         <div class="plan-tier">Free</div>
         <div class="plan-price">
           <span class="price-amount">$0</span>
