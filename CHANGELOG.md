@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+**Product**
+- Evil Merge Detector is now free for everyone — removed the paid Pro plan, disabled Stripe billing, and dropped the 50 scans/month cap on the Free plan
+- Landing page, README, GitHub Marketplace listing, and Terms of Service updated to reflect the single free plan
+
+**Infrastructure**
+- Migrated the hosted database from Fly Postgres to Neon — removes the only component of the stack that couldn't scale to zero
+
 ## [0.1.9] - 2026-03-28
 
 ### Security

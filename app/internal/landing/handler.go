@@ -1302,7 +1302,7 @@ footer {
     </div>
     <div class="stat">
       <span class="stat-val">Free</span>
-      <span class="stat-label">For public repos</span>
+      <span class="stat-label">For everyone</span>
     </div>
   </div>
 </div>
@@ -1845,7 +1845,7 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
 
 <main>
   <h1>Terms of Service</h1>
-  <p class="updated">Last updated: May 10, 2026</p>
+  <p class="updated">Last updated: August 6, 2026</p>
 
   <p>These Terms of Service (the &ldquo;Terms&rdquo;) govern your access to and use of the Evil Merge Detector hosted service available at <a href="https://evilmerge.dev">evilmerge.dev</a>, the GitHub App listed at <a href="https://github.com/apps/evil-merge-detector">github.com/apps/evil-merge-detector</a>, and the related dashboard, badges, and APIs (together, the &ldquo;Service&rdquo;). By installing the GitHub App or using the Service in any way, you agree to these Terms. If you do not agree, do not install the App and do not use the Service.</p>
 
@@ -1853,20 +1853,15 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
   <p>The Service is operated by Fimskiy (the &ldquo;Provider&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;). For any legal or contractual matter, contact <a href="mailto:legal@evilmerge.dev">legal@evilmerge.dev</a>.</p>
 
   <h2>2. The Service</h2>
-  <p>The Service scans pull requests in repositories where the GitHub App has been installed and reports merge commits whose content cannot be reproduced by a clean three-way merge of the parent commits (&ldquo;evil merges&rdquo;). Findings are posted as GitHub Check Runs on the pull request and, on paid plans, retained in a scan history dashboard.</p>
+  <p>The Service scans pull requests in repositories where the GitHub App has been installed and reports merge commits whose content cannot be reproduced by a clean three-way merge of the parent commits (&ldquo;evil merges&rdquo;). Findings are posted as GitHub Check Runs on the pull request and retained in a scan history dashboard.</p>
   <p>The Service is provided as-is. We do not guarantee that every evil merge will be detected, that every reported finding represents a real attack, or that the Service will be uninterrupted or error-free.</p>
   <p>The detection engine is also distributed as an open-source CLI and GitHub Action under the MIT license. Use of those distributions is governed by the MIT license, not these Terms.</p>
 
   <h2>3. Eligibility and Account</h2>
   <p>You must be at least 16 years old and have authority to bind the GitHub user or organization on whose behalf you install the App. You authenticate to the dashboard through GitHub OAuth; we do not store GitHub passwords. You are responsible for the actions taken under your GitHub identity while using the Service.</p>
 
-  <h2>4. Plans, Fees, and Billing</h2>
-  <ul>
-    <li><strong>Free plan</strong> &mdash; available for public repositories, with up to 50 pull-request scans per organization per calendar month.</li>
-    <li><strong>Pro plan</strong> &mdash; USD 7 per organization per month, billed monthly in advance through GitHub Marketplace or, where offered, through Stripe. Pro adds private-repository support, removes the scan limit, and unlocks the scan history dashboard and Slack / webhook / email notifications.</li>
-  </ul>
-  <p>Subscriptions renew automatically until cancelled. You may cancel at any time from GitHub Marketplace (or, where applicable, the Stripe customer portal); cancellation takes effect at the end of the current billing period and you retain access until that date. Fees already paid are non-refundable except where required by applicable law (in particular, mandatory consumer-protection rights under EU law are not affected by these Terms).</p>
-  <p>Prices may change. We will give you reasonable advance notice (at least 30 days) before any price increase takes effect on your subscription, and you may cancel before the change applies.</p>
+  <h2>4. Fees</h2>
+  <p>The Service is provided free of charge, with no usage limits, for both public and private repositories. If we introduce paid plans in the future, participation will be optional and we will give you reasonable advance notice (at least 30 days) before any fee applies to your account.</p>
 
   <h2>5. Acceptable Use</h2>
   <p>You agree not to:</p>
@@ -1880,7 +1875,7 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
   <p>We may suspend or terminate access immediately if we reasonably believe you are violating this section.</p>
 
   <h2>6. Your Content and Permissions</h2>
-  <p>The Service requires read access to your repository code, pull requests, and metadata, and write access to GitHub Check Runs in order to post findings. We process this content only to operate the Service: scanning merge commits, generating check output, and (on Pro) storing scan results in the dashboard. We do not use your code to train any machine-learning model and we do not share it with third parties except as described in our Privacy Policy.</p>
+  <p>The Service requires read access to your repository code, pull requests, and metadata, and write access to GitHub Check Runs in order to post findings. We process this content only to operate the Service: scanning merge commits, generating check output, and storing scan results in the dashboard. We do not use your code to train any machine-learning model and we do not share it with third parties except as described in our Privacy Policy.</p>
   <p>You retain all rights to your code and metadata. You grant us a limited, non-exclusive licence to access and process them solely as needed to provide the Service.</p>
 
   <h2>7. Privacy</h2>
@@ -1896,10 +1891,10 @@ footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--bor
   <p>To the maximum extent permitted by law, the Provider&rsquo;s aggregate liability arising out of or related to these Terms or the Service is limited to the greater of (a) the fees you paid for the Service in the twelve (12) months preceding the event giving rise to the claim, or (b) USD 100. We are not liable for indirect, incidental, special, consequential, or punitive damages, or for loss of profits, revenue, data, or goodwill, even if advised of the possibility of such damages. Nothing in these Terms limits liability that cannot be limited under applicable law (such as liability for gross negligence, wilful misconduct, or rights of consumers under EU law).</p>
 
   <h2>11. Termination</h2>
-  <p>You may stop using the Service at any time by uninstalling the GitHub App and, where applicable, cancelling your paid subscription. We may suspend or terminate your access if you breach these Terms or if continued provision of the Service to you would expose us to legal or security risk. On termination, sections that by their nature should survive (in particular sections 8&ndash;10) will survive.</p>
+  <p>You may stop using the Service at any time by uninstalling the GitHub App. We may suspend or terminate your access if you breach these Terms or if continued provision of the Service to you would expose us to legal or security risk. On termination, sections that by their nature should survive (in particular sections 8&ndash;10) will survive.</p>
 
   <h2>12. Changes to These Terms</h2>
-  <p>We may update these Terms from time to time. The &ldquo;Last updated&rdquo; date at the top of this page reflects the latest revision. For material changes affecting paid users we will give reasonable advance notice (e.g. by email or in-product notice). Continued use of the Service after changes take effect constitutes acceptance of the revised Terms.</p>
+  <p>We may update these Terms from time to time. The &ldquo;Last updated&rdquo; date at the top of this page reflects the latest revision. For material changes we will give reasonable advance notice where appropriate (e.g. by email or in-product notice). Continued use of the Service after changes take effect constitutes acceptance of the revised Terms.</p>
 
   <h2>13. Governing Law</h2>
   <p>These Terms are governed by the laws of the Republic of Poland, without regard to its conflict-of-laws rules. Any dispute arising out of or in connection with these Terms will be submitted to the exclusive jurisdiction of the competent courts in Poland, except that where you act as a consumer the mandatory consumer-protection rules of your country of residence apply.</p>
