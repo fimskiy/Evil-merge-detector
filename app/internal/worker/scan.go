@@ -132,6 +132,9 @@ func runScan(ctx context.Context, job PRJob) (*models.ScanResult, error) {
 	return s.Scan(ctx, models.ScanOptions{
 		RepoPath: tmpDir,
 		Branch:   job.HeadRef,
+		// Info-severity findings are conflict-resolution changes that are
+		// likely legitimate (see detector.go) — match the GitHub Action's
+		// fail-on=warning default so the check doesn't fail on those.
+		MinSeverity: models.SeverityWarning,
 	})
 }
-

@@ -62,6 +62,8 @@ func ScanHistory(job HistoryJob) {
 	result, err := s.Scan(ctx, models.ScanOptions{
 		RepoPath: tmpDir,
 		Branch:   branch,
+		// See scan.go: match the GitHub Action's fail-on=warning default.
+		MinSeverity: models.SeverityWarning,
 	})
 	if err != nil {
 		log.Printf("history scan %s/%s: %v", job.Owner, job.Repo, err)

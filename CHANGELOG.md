@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+**GitHub App**
+- Check runs failed on Info-severity findings (legitimate merge-conflict resolutions), unlike the GitHub Action's `fail-on=warning` default — the App now uses the same threshold, so ordinary conflict resolutions no longer fail PR checks
+
 ### Changed
 
 **Product**
