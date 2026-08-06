@@ -15,11 +15,12 @@ type Handler struct {
 	db             *store.Store
 	tmpl           *template.Template
 	billingEnabled bool
+	adminLogin     string
 }
 
-func New(secret []byte, db *store.Store, billingEnabled bool) *Handler {
+func New(secret []byte, db *store.Store, billingEnabled bool, adminLogin string) *Handler {
 	tmpl := template.Must(template.New("dashboard").Parse(dashboardTmpl))
-	return &Handler{secret: secret, db: db, tmpl: tmpl, billingEnabled: billingEnabled}
+	return &Handler{secret: secret, db: db, tmpl: tmpl, billingEnabled: billingEnabled, adminLogin: adminLogin}
 }
 
 type pageData struct {
@@ -29,6 +30,7 @@ type pageData struct {
 	AppInstalled   bool
 	BillingEnabled bool
 	Upgraded       bool
+	IsAdmin        bool
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +45,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		AppInstalled:   sess.InstallationID != 0,
 		BillingEnabled: h.billingEnabled,
 		Upgraded:       r.URL.Query().Get("upgraded") == "1",
+		IsAdmin:        h.adminLogin != "" && sess.GitHubLogin == h.adminLogin,
 	}
 
 	if h.db != nil && sess.InstallationID != 0 {
@@ -117,6 +120,7 @@ tr:hover td { background: #161b22; }
   <div class="user">
     <span>{{.Login}}</span>
     {{if .Plan}}<span class="plan {{if eq .Plan "pro"}}pro{{end}}">{{.Plan}}</span>{{end}}
+    {{if .IsAdmin}}<a class="logout" href="/admin">Admin</a>{{end}}
     <a class="logout" href="/auth/logout">Sign out</a>
   </div>
 </header>

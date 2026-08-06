@@ -7,20 +7,21 @@ import (
 )
 
 type Config struct {
-	Port               string
-	AppID              int64
-	PrivateKey         []byte
-	WebhookSecret      []byte
-	DatabaseURL        string
-	OAuthClientID      string
-	OAuthClientSecret  string
-	SessionSecret      []byte
+	Port                   string
+	AppID                  int64
+	PrivateKey             []byte
+	WebhookSecret          []byte
+	DatabaseURL            string
+	OAuthClientID          string
+	OAuthClientSecret      string
+	SessionSecret          []byte
 	NotificationWebhookURL string
 	SlackWebhookURL        string
 	StripeSecretKey        string
 	StripePriceMonthly     string
 	StripePriceYearly      string
 	StripeWebhookSecret    string
+	AdminGitHubLogin       string
 }
 
 func Load() (*Config, error) {
@@ -63,10 +64,10 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
-		Port:              port,
-		AppID:             appID,
-		PrivateKey:        []byte(privateKey),
-		WebhookSecret:     []byte(webhookSecret),
+		Port:                   port,
+		AppID:                  appID,
+		PrivateKey:             []byte(privateKey),
+		WebhookSecret:          []byte(webhookSecret),
 		DatabaseURL:            os.Getenv("DATABASE_URL"),
 		OAuthClientID:          os.Getenv("GITHUB_OAUTH_CLIENT_ID"),
 		OAuthClientSecret:      os.Getenv("GITHUB_OAUTH_CLIENT_SECRET"),
@@ -77,5 +78,6 @@ func Load() (*Config, error) {
 		StripePriceMonthly:     os.Getenv("STRIPE_PRICE_MONTHLY"),
 		StripePriceYearly:      os.Getenv("STRIPE_PRICE_YEARLY"),
 		StripeWebhookSecret:    os.Getenv("STRIPE_WEBHOOK_SECRET"),
+		AdminGitHubLogin:       os.Getenv("ADMIN_GITHUB_LOGIN"),
 	}, nil
 }

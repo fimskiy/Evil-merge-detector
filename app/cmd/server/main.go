@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/fimskiy/evil-merge-detector/app/internal/admin"
 	"github.com/fimskiy/evil-merge-detector/app/internal/badge"
 	"github.com/fimskiy/evil-merge-detector/app/internal/billing"
 	"github.com/fimskiy/evil-merge-detector/app/internal/config"
@@ -80,7 +81,8 @@ func main() {
 	mux.HandleFunc("/auth/github", oauthHandler.Login)
 	mux.HandleFunc("/auth/callback", oauthHandler.Callback)
 	mux.HandleFunc("/auth/logout", oauthHandler.Logout)
-	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db, cfg.StripeSecretKey != ""))
+	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db, cfg.StripeSecretKey != "", cfg.AdminGitHubLogin))
+	mux.Handle("/admin", admin.New(cfg.SessionSecret, db, cfg.AdminGitHubLogin))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			landing.Handler(w, r)
