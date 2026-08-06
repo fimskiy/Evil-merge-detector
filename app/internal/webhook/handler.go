@@ -63,12 +63,9 @@ func (h *Handler) handlePR(r *http.Request, e *github.PullRequestEvent) {
 	pr := e.GetPullRequest()
 	installationID := e.GetInstallation().GetID()
 
-	var pro bool
-	if h.db != nil {
-		if inst, err := h.db.GetInstallation(r.Context(), installationID); err == nil {
-			pro = inst.Plan == "pro"
-		}
-	}
+	// Project is free for everyone; the monthly scan cap is retired but the
+	// plan/billing plumbing is left in place in case it's ever needed again.
+	pro := true
 
 	job := worker.PRJob{
 		Owner:          e.GetRepo().GetOwner().GetLogin(),

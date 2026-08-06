@@ -101,13 +101,6 @@ var page = `<!DOCTYPE html>
       "price": "0",
       "priceCurrency": "USD",
       "name": "Free",
-      "description": "Public repositories, 50 PR scans per month"
-    },
-    {
-      "@type": "Offer",
-      "price": "7",
-      "priceCurrency": "USD",
-      "name": "Pro",
       "description": "Public and private repositories, unlimited scans"
     }
   ],
@@ -1430,53 +1423,24 @@ evilmerge scan .</pre>
 <section id="pricing">
   <div class="section-inner">
     <div class="label">Pricing</div>
-    <h2>Simple, per-organization<br>pricing</h2>
-    <p class="section-sub">The CLI and GitHub Action are always free and open source.</p>
+    <h2>Free for everyone,<br>no catch</h2>
+    <p class="section-sub">The CLI, GitHub Action, and GitHub App are all free and open source &mdash; no plans, no limits, no credit card.</p>
 
-    <div class="pricing-toggle">
-      <span class="toggle-label active" id="lbl-monthly">Monthly</span>
-      <button class="toggle-switch" id="billing-toggle" aria-label="Switch billing period" aria-pressed="false">
-        <span class="toggle-knob"></span>
-      </button>
-      <span class="toggle-label" id="lbl-annual">Annual <span class="save-badge">Save 20%</span></span>
-    </div>
-
-    <div class="pricing-wrap">
-      <div class="plan reveal">
+    <div class="pricing-wrap" style="grid-template-columns: 1fr; max-width: 360px;">
+      <div class="plan featured reveal">
         <div class="plan-tier">Free</div>
         <div class="plan-price">
           <span class="price-amount">$0</span>
         </div>
-        <div class="plan-desc">For open source and personal projects</div>
-        <ul>
-          <li><span class="check">&#10003;</span> Public repositories</li>
-          <li><span class="check">&#10003;</span> 50 PR scans / month</li>
-          <li><span class="check">&#10003;</span> GitHub Checks integration</li>
-          <li class="no"><span class="check">&ndash;</span> Private repositories</li>
-          <li><span class="check">&#10003;</span> Scan history dashboard</li>
-          <li class="no"><span class="check">&ndash;</span> Unlimited scans</li>
-        </ul>
-        <a class="plan-btn" id="btn-plan-free" href="https://github.com/apps/evil-merge-detector">Install for free</a>
-        <p class="plan-note">No credit card required</p>
-      </div>
-
-      <div class="plan featured reveal">
-        <div class="plan-tier">Pro</div>
-        <div class="plan-price">
-          <span class="price-currency">$</span>
-          <span class="price-amount" id="pro-price">7</span>
-          <span class="price-period" id="pro-period">/month</span>
-        </div>
-        <div class="plan-desc">For teams and private repositories</div>
+        <div class="plan-desc">For everyone &mdash; public and private repositories</div>
         <ul>
           <li><span class="check">&#10003;</span> Public &amp; private repositories</li>
           <li><span class="check">&#10003;</span> Unlimited PR scans</li>
           <li><span class="check">&#10003;</span> GitHub Checks integration</li>
           <li><span class="check">&#10003;</span> Scan history dashboard</li>
-          <li><span class="check">&#10003;</span> Priority support</li>
         </ul>
-        <a class="plan-btn" id="btn-plan-pro" href="/dashboard">Upgrade to Pro</a>
-        <p class="plan-note">Cancel anytime · No lock-in</p>
+        <a class="plan-btn" id="btn-plan-free" href="https://github.com/apps/evil-merge-detector">Install for free</a>
+        <p class="plan-note">No credit card required</p>
       </div>
     </div>
   </div>
@@ -1497,7 +1461,7 @@ evilmerge scan .</pre>
       </details>
       <details class="faq-item reveal">
         <summary class="faq-q">What counts as a PR scan?</summary>
-        <p class="faq-a">One scan = one pull request event (opened or synchronized). Scans that find no merge commits in the PR are not counted against your limit.</p>
+        <p class="faq-a">One scan = one pull request event (opened or synchronized). There's no monthly limit.</p>
       </details>
       <details class="faq-item reveal">
         <summary class="faq-q">Can it produce false positives?</summary>
@@ -1510,10 +1474,6 @@ evilmerge scan .</pre>
       <details class="faq-item reveal">
         <summary class="faq-q">Doesn&rsquo;t enabling &ldquo;Dismiss stale reviews&rdquo; prevent this?</summary>
         <p class="faq-a">Partially &mdash; and only going forward. &ldquo;Dismiss stale reviews&rdquo; forces re-review when new commits are pushed, which makes the attack harder to execute. But it doesn&rsquo;t scan your existing history for past injections, requires manual setup on every repository, and can be changed by any admin at any time. GitHub themselves confirmed this attack vector is <strong>working as designed</strong> and has no plans to address it &mdash; making detection, not just prevention, essential.</p>
-      </details>
-      <details class="faq-item reveal">
-        <summary class="faq-q">What happens when I exceed 50 scans on the Free plan?</summary>
-        <p class="faq-a">Additional PRs will not be scanned and the check run will be skipped with a note explaining the limit. No errors, no failed checks — just a nudge to upgrade.</p>
       </details>
     </div>
   </div>
@@ -1634,24 +1594,6 @@ evilmerge scan .</pre>
     });
   }
 
-  // Pricing toggle
-  var toggle = document.getElementById('billing-toggle');
-  var proPrice = document.getElementById('pro-price');
-  var proPeriod = document.getElementById('pro-period');
-  var lblMonthly = document.getElementById('lbl-monthly');
-  var lblAnnual = document.getElementById('lbl-annual');
-  var isAnnual = false;
-  if (toggle) {
-    toggle.addEventListener('click', function() {
-      isAnnual = !isAnnual;
-      toggle.classList.toggle('annual', isAnnual);
-      toggle.setAttribute('aria-pressed', isAnnual ? 'true' : 'false');
-      if (proPrice) proPrice.textContent = isAnnual ? '67' : '7';
-      if (proPeriod) proPeriod.textContent = isAnnual ? '/year' : '/month';
-      if (lblMonthly) lblMonthly.classList.toggle('active', !isAnnual);
-      if (lblAnnual) lblAnnual.classList.toggle('active', isAnnual);
-    });
-  }
 })();
 
 // Cookie consent + GTM (EU only, detected server-side via CF-IPCountry)
