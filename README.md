@@ -100,7 +100,7 @@ The easiest way to get started — install once and every pull request in your o
 - Scan history available at [evilmerge.dev/dashboard](https://evilmerge.dev/dashboard)
 - Slack / webhook notifications when evil merges are found
 
-**Plans:** Free (public repos, 50 scans/month) · Pro $7/month (private repos, unlimited scans, dashboard)
+**Free for everyone** — public and private repos, unlimited scans, dashboard included.
 
 **Status badge** — add to your README:
 
