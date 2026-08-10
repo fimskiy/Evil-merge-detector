@@ -100,6 +100,46 @@ h2 { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
       <div class="stat-val">{{.TotalEvilMerges}}</div>
       <div class="stat-label">Evil merges found</div>
     </div>
+    <div class="stat">
+      <div class="stat-val">{{.ActiveInstallations30d}}</div>
+      <div class="stat-label">Active installations (30 days)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{.NewInstallations7d}}</div>
+      <div class="stat-label">New installations (7 days)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{.NewInstallations30d}}</div>
+      <div class="stat-label">New installations (30 days)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{printf "%.1f%%" .EvilMergeRate}}</div>
+      <div class="stat-label">Evil merge rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{printf "%.0fms" .AvgScanDurationMs}}</div>
+      <div class="stat-label">Avg scan duration</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{printf "%.0fms" .P95ScanDurationMs}}</div>
+      <div class="stat-label">p95 scan duration</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{.OrgInstallations}}</div>
+      <div class="stat-label">Organization installs</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{.UserInstallations}}</div>
+      <div class="stat-label">User installs</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{printf "%.1f%%" .PRScanRate}}</div>
+      <div class="stat-label">PR-scoped scans</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{.InstallationsNoScans}}</div>
+      <div class="stat-label">Installations with no scans</div>
+    </div>
   </div>
 </main>
 </body>
