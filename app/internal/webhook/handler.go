@@ -22,6 +22,14 @@ type Handler struct {
 	notifier *notifier.Notifier
 }
 
+// PR scans each do a full git clone, which is memory-heavy; without a cap, a
+// burst of PR webhook events can run enough clones concurrently to exhaust
+// the machine's memory and get OOM-killed. History scans already cap at the
+// same limit (see triggerHistoryScan below).
+const maxConcurrentPRScans = 3
+
+var prScanSem = make(chan struct{}, maxConcurrentPRScans)
+
 func New(cfg *config.Config, db *store.Store, ntf *notifier.Notifier) http.Handler {
 	return &Handler{cfg: cfg, db: db, notifier: ntf}
 }
@@ -83,7 +91,11 @@ func (h *Handler) handlePR(r *http.Request, e *github.PullRequestEvent) {
 	}
 
 	log.Printf("scanning PR #%d in %s/%s (%.7s)", pr.GetNumber(), job.Owner, job.Repo, job.HeadSHA)
-	go worker.ScanPR(job)
+	go func() {
+		prScanSem <- struct{}{}
+		defer func() { <-prScanSem }()
+		worker.ScanPR(job)
+	}()
 }
 
 func (h *Handler) handleInstallation(ctx context.Context, e *github.InstallationEvent) {
