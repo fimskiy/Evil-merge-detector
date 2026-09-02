@@ -14,6 +14,12 @@ import (
 	"github.com/fimskiy/evil-merge-detector/internal/scanner"
 )
 
+// repoRateLimitWindow caps a repo to one "synchronize" scan per window. Each
+// scan walks the whole branch history, so a repo pushing more often than this
+// (e.g. a bot force-pushing every few seconds) would otherwise keep both
+// machines busy re-cloning and re-scanning it around the clock.
+const repoRateLimitWindow = 2 * time.Minute
+
 type PRJob struct {
 	Owner          string
 	Repo           string
@@ -27,6 +33,7 @@ type PRJob struct {
 	DB             *store.Store
 	Notifier       *notifier.Notifier
 	Pro            bool
+	Action         string // GitHub PR event action: "opened", "synchronize", or "reopened"
 }
 
 func ScanPR(job PRJob) {
@@ -54,6 +61,22 @@ func ScanPR(job PRJob) {
 			limitErr := fmt.Errorf("monthly scan limit reached (50/month on Free plan). Upgrade to Pro at https://evilmerge.dev/#pricing")
 			if err := ghclient.FailCheckRun(ctx, client, job.Owner, job.Repo, runID, limitErr); err != nil {
 				log.Printf("error failing check run: %v", err)
+			}
+			return
+		}
+	}
+
+	// Only throttle "synchronize" (a new push to an already-open PR). "opened"
+	// and "reopened" always scan, so a PR is never merged without at least
+	// one scan just because another PR in the same repo was pushed recently.
+	if job.DB != nil && job.Action == "synchronize" {
+		claimed, err := job.DB.ClaimRepoScan(ctx, job.Owner, job.Repo, repoRateLimitWindow)
+		if err != nil {
+			log.Printf("rate limit claim for %s/%s: %v", job.Owner, job.Repo, err)
+		} else if !claimed {
+			log.Printf("rate limit: skipping scan for %s/%s (already scanned within %s)", job.Owner, job.Repo, repoRateLimitWindow)
+			if err := ghclient.SkipCheckRun(ctx, client, job.Owner, job.Repo, runID); err != nil {
+				log.Printf("error skipping check run: %v", err)
 			}
 			return
 		}

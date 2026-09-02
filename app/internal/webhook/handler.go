@@ -88,6 +88,7 @@ func (h *Handler) handlePR(r *http.Request, e *github.PullRequestEvent) {
 		DB:             h.db,
 		Notifier:       h.notifier,
 		Pro:            pro,
+		Action:         action,
 	}
 
 	log.Printf("scanning PR #%d in %s/%s (%.7s)", pr.GetNumber(), job.Owner, job.Repo, job.HeadSHA)

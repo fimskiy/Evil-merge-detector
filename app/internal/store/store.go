@@ -61,6 +61,13 @@ func (s *Store) Migrate(ctx context.Context) error {
 		ALTER TABLE installations
 			ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
 
+		CREATE TABLE IF NOT EXISTS repo_scan_claims (
+			owner      TEXT NOT NULL,
+			repo       TEXT NOT NULL,
+			claimed_at TIMESTAMPTZ NOT NULL,
+			PRIMARY KEY (owner, repo)
+		);
+
 		DO $$
 		BEGIN
 			IF NOT EXISTS (

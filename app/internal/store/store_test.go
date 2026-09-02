@@ -3,7 +3,9 @@ package store_test
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 )
@@ -272,6 +274,76 @@ func TestMonthlyScansCount(t *testing.T) {
 	}
 	if count != 3 {
 		t.Errorf("count %d, want 3", count)
+	}
+}
+
+func TestClaimRepoScan(t *testing.T) {
+	db := testDB(t)
+	ctx := context.Background()
+
+	const owner, repo = "rate-limited", "repo"
+	t.Cleanup(func() { _ = db.DeleteRepoScanClaim(ctx, owner, repo) })
+
+	claimed, err := db.ClaimRepoScan(ctx, owner, repo, time.Minute)
+	if err != nil {
+		t.Fatalf("ClaimRepoScan: %v", err)
+	}
+	if !claimed {
+		t.Error("expected first claim to succeed")
+	}
+
+	claimed, err = db.ClaimRepoScan(ctx, owner, repo, time.Minute)
+	if err != nil {
+		t.Fatalf("ClaimRepoScan: %v", err)
+	}
+	if claimed {
+		t.Error("expected second claim within the window to fail")
+	}
+
+	// A zero window means the previous claim is already "expired", so this
+	// should succeed - confirms the claim isn't stuck forever.
+	claimed, err = db.ClaimRepoScan(ctx, owner, repo, 0)
+	if err != nil {
+		t.Fatalf("ClaimRepoScan: %v", err)
+	}
+	if !claimed {
+		t.Error("expected claim with zero window to succeed")
+	}
+}
+
+func TestClaimRepoScan_ConcurrentCallersOnlyOneWins(t *testing.T) {
+	db := testDB(t)
+	ctx := context.Background()
+
+	const owner, repo = "rate-limited", "concurrent-repo"
+	t.Cleanup(func() { _ = db.DeleteRepoScanClaim(ctx, owner, repo) })
+
+	const n = 20
+	results := make(chan bool, n)
+	var wg sync.WaitGroup
+	for range n {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			claimed, err := db.ClaimRepoScan(ctx, owner, repo, time.Minute)
+			if err != nil {
+				t.Errorf("ClaimRepoScan: %v", err)
+				return
+			}
+			results <- claimed
+		}()
+	}
+	wg.Wait()
+	close(results)
+
+	wins := 0
+	for claimed := range results {
+		if claimed {
+			wins++
+		}
+	}
+	if wins != 1 {
+		t.Errorf("wins = %d, want exactly 1 (race allowed concurrent claims through)", wins)
 	}
 }
 
