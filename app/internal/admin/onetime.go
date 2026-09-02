@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -37,6 +38,15 @@ func DisableCheckSuiteAutotrigger(cfg *config.Config) http.HandlerFunc {
 			if flusher != nil {
 				flusher.Flush()
 			}
+		}
+
+		// Some installations have hundreds of repos - one call can get cut
+		// off by an infra-level connection limit before finishing. Setting
+		// this is idempotent, so offset/limit let it be resumed in batches.
+		offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+		if err != nil || limit <= 0 {
+			limit = 1 << 30
 		}
 
 		pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
@@ -80,7 +90,16 @@ func DisableCheckSuiteAutotrigger(cfg *config.Config) http.HandlerFunc {
 				flush()
 				continue
 			}
-			fmt.Fprintf(w, "installation %d: %d repo(s)\n", instID, len(repos))
+			fmt.Fprintf(w, "installation %d: %d repo(s) total\n", instID, len(repos))
+			flush()
+
+			end := min(offset+limit, len(repos))
+			if offset < len(repos) {
+				repos = repos[offset:end]
+			} else {
+				repos = nil
+			}
+			fmt.Fprintf(w, "installation %d: processing [%d:%d)\n", instID, offset, end)
 			flush()
 
 			// Some installations have hundreds of repos; doing these one at a
