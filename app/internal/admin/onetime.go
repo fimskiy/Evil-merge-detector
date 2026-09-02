@@ -32,6 +32,12 @@ func DisableCheckSuiteAutotrigger(cfg *config.Config) http.HandlerFunc {
 			return
 		}
 		ctx := r.Context()
+		flusher, _ := w.(http.Flusher)
+		flush := func() {
+			if flusher != nil {
+				flusher.Flush()
+			}
+		}
 
 		pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
 		if err != nil {
@@ -57,18 +63,25 @@ func DisableCheckSuiteAutotrigger(cfg *config.Config) http.HandlerFunc {
 		}
 		rows.Close()
 
+		fmt.Fprintf(w, "found %d installation(s)\n", len(installationIDs))
+		flush()
+
 		for _, instID := range installationIDs {
 			client, err := ghclient.ForInstallation(cfg.AppID, instID, cfg.PrivateKey)
 			if err != nil {
 				fmt.Fprintf(w, "installation %d: client: %v\n", instID, err)
+				flush()
 				continue
 			}
 
 			repos, err := ghclient.ListRepos(ctx, cfg.AppID, instID, cfg.PrivateKey)
 			if err != nil {
 				fmt.Fprintf(w, "installation %d: listing repos: %v\n", instID, err)
+				flush()
 				continue
 			}
+			fmt.Fprintf(w, "installation %d: %d repo(s)\n", instID, len(repos))
+			flush()
 
 			for _, repo := range repos {
 				owner, name := repo.Owner, repo.Name
@@ -79,9 +92,11 @@ func DisableCheckSuiteAutotrigger(cfg *config.Config) http.HandlerFunc {
 				})
 				if err != nil {
 					fmt.Fprintf(w, "%s/%s: %v\n", owner, name, err)
+					flush()
 					continue
 				}
 				fmt.Fprintf(w, "%s/%s: auto_trigger_checks disabled\n", owner, name)
+				flush()
 			}
 		}
 	}
