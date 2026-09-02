@@ -83,9 +83,6 @@ func main() {
 	mux.HandleFunc("/auth/logout", oauthHandler.Logout)
 	mux.Handle("/dashboard", dashboard.New(cfg.SessionSecret, db, cfg.StripeSecretKey != "", cfg.AdminGitHubLogin))
 	mux.Handle("/admin", admin.New(cfg.SessionSecret, db, cfg.AdminGitHubLogin))
-	mux.HandleFunc("/internal/disable-checksuite-autotrigger", admin.DisableCheckSuiteAutotrigger(cfg))
-	mux.HandleFunc("/internal/repo-scan-stats", admin.RepoScanStats(cfg))
-	mux.HandleFunc("/internal/verify-repo-scan-claim", admin.VerifyRepoScanClaim(cfg))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			landing.Handler(w, r)
