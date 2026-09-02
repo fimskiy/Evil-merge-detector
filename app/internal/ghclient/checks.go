@@ -63,6 +63,19 @@ func FailCheckRun(ctx context.Context, client *github.Client, owner, repo string
 	return err
 }
 
+func SkipCheckRun(ctx context.Context, client *github.Client, owner, repo string, runID int64) error {
+	_, _, err := client.Checks.UpdateCheckRun(ctx, owner, repo, runID, github.UpdateCheckRunOptions{
+		Name:       checkName,
+		Status:     github.Ptr("completed"),
+		Conclusion: github.Ptr("neutral"),
+		Output: &github.CheckRunOutput{
+			Title:   github.Ptr("Scan skipped: rate limit"),
+			Summary: github.Ptr("This repository is pushing faster than Evil Merge Detector can scan (each scan walks the full branch history). Skipping this push - it'll scan on the next one."),
+		},
+	})
+	return err
+}
+
 func buildSummary(result *models.ScanResult) string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Found **%d** evil merge commit(s) with **%d** suspicious change(s).\n\n",

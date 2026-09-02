@@ -1,8 +1,11 @@
 package admin
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/google/go-github/v84/github"
@@ -10,6 +13,7 @@ import (
 
 	"github.com/fimskiy/evil-merge-detector/app/internal/config"
 	"github.com/fimskiy/evil-merge-detector/app/internal/ghclient"
+	"github.com/fimskiy/evil-merge-detector/app/internal/store"
 )
 
 // oneTimeToken gates a temporary maintenance endpoint. Delete this file
@@ -142,5 +146,97 @@ func RepoScanStats(cfg *config.Config) http.HandlerFunc {
 			return
 		}
 		fmt.Fprintf(w, "%s/%s: %d scans in last 24h, %d in last hour\n", owner, repo, last24h, lastHour)
+	}
+}
+
+// VerifyRepoScanClaim proves ClaimRepoScan can't be raced against the real
+// production database: fires many concurrent claims for a throwaway repo and
+// checks exactly one wins, then cleans up its own rows.
+func VerifyRepoScanClaim(cfg *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("token") != oneTimeToken {
+			http.NotFound(w, r)
+			return
+		}
+		ctx := r.Context()
+
+		db, err := store.New(ctx, cfg.DatabaseURL)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+		if err := db.Migrate(ctx); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		const owner, repo = "verify-claim-test", "repo"
+		// Cleanup must outlive the request context - a disconnected client
+		// shouldn't leave a stale claim row behind for the next run.
+		defer func() {
+			cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := db.DeleteRepoScanClaim(cleanupCtx, owner, repo); err != nil {
+				log.Printf("verify-repo-scan-claim: cleanup: %v", err)
+			}
+		}()
+
+		claimed, err := db.ClaimRepoScan(ctx, owner, repo, time.Minute)
+		if err != nil {
+			fmt.Fprintf(w, "FAIL: first claim errored: %v\n", err)
+			return
+		}
+		fmt.Fprintf(w, "first claim: %v (want true)\n", claimed)
+
+		claimed, err = db.ClaimRepoScan(ctx, owner, repo, time.Minute)
+		if err != nil {
+			fmt.Fprintf(w, "FAIL: second claim errored: %v\n", err)
+			return
+		}
+		fmt.Fprintf(w, "second claim within window: %v (want false)\n", claimed)
+
+		if err := db.DeleteRepoScanClaim(ctx, owner, repo); err != nil {
+			fmt.Fprintf(w, "FAIL: cleanup before concurrency test: %v\n", err)
+			return
+		}
+
+		const n = 50
+		var wins int
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		var firstErr error
+		for range n {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				claimed, err := db.ClaimRepoScan(ctx, owner, repo, time.Minute)
+				if err != nil {
+					mu.Lock()
+					if firstErr == nil {
+						firstErr = err
+					}
+					mu.Unlock()
+					return
+				}
+				if claimed {
+					mu.Lock()
+					wins++
+					mu.Unlock()
+				}
+			}()
+		}
+		wg.Wait()
+
+		if firstErr != nil {
+			fmt.Fprintf(w, "FAIL: concurrent claim errored: %v\n", firstErr)
+			return
+		}
+		fmt.Fprintf(w, "concurrent claims: %d/%d winners (want exactly 1)\n", wins, n)
+		if wins == 1 {
+			fmt.Fprintln(w, "PASS")
+		} else {
+			fmt.Fprintln(w, "FAIL")
+		}
 	}
 }
