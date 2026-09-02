@@ -83,21 +83,35 @@ func DisableCheckSuiteAutotrigger(cfg *config.Config) http.HandlerFunc {
 			fmt.Fprintf(w, "installation %d: %d repo(s)\n", instID, len(repos))
 			flush()
 
+			// Some installations have hundreds of repos; doing these one at a
+			// time serially risks tripping a long-connection limit somewhere
+			// on the way to the client, so fan out with bounded concurrency.
+			const maxConcurrent = 10
+			sem := make(chan struct{}, maxConcurrent)
+			var wg sync.WaitGroup
+			var mu sync.Mutex
 			for _, repo := range repos {
-				owner, name := repo.Owner, repo.Name
-				_, _, err := client.Checks.SetCheckSuitePreferences(ctx, owner, name, github.CheckSuitePreferenceOptions{
-					AutoTriggerChecks: []*github.AutoTriggerCheck{
-						{AppID: github.Ptr(cfg.AppID), Setting: github.Ptr(false)},
-					},
-				})
-				if err != nil {
-					fmt.Fprintf(w, "%s/%s: %v\n", owner, name, err)
+				sem <- struct{}{}
+				wg.Add(1)
+				go func(owner, name string) {
+					defer wg.Done()
+					defer func() { <-sem }()
+					_, _, err := client.Checks.SetCheckSuitePreferences(ctx, owner, name, github.CheckSuitePreferenceOptions{
+						AutoTriggerChecks: []*github.AutoTriggerCheck{
+							{AppID: github.Ptr(cfg.AppID), Setting: github.Ptr(false)},
+						},
+					})
+					mu.Lock()
+					defer mu.Unlock()
+					if err != nil {
+						fmt.Fprintf(w, "%s/%s: %v\n", owner, name, err)
+					} else {
+						fmt.Fprintf(w, "%s/%s: auto_trigger_checks disabled\n", owner, name)
+					}
 					flush()
-					continue
-				}
-				fmt.Fprintf(w, "%s/%s: auto_trigger_checks disabled\n", owner, name)
-				flush()
+				}(repo.Owner, repo.Name)
 			}
+			wg.Wait()
 		}
 	}
 }
