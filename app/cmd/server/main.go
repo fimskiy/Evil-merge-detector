@@ -230,7 +230,7 @@ func runPendingHistoryScans(cfg *config.Config, db *store.Store, ntf *notifier.N
 	log.Printf("scheduler: found %d installation(s) pending full scan", len(installations))
 
 	// Limit concurrent history scans to avoid exhausting resources.
-	const maxConcurrent = 3
+	const maxConcurrent = 2
 	sem := make(chan struct{}, maxConcurrent)
 	var wg sync.WaitGroup
 

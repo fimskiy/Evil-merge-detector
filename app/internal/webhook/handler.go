@@ -26,7 +26,7 @@ type Handler struct {
 // burst of PR webhook events can run enough clones concurrently to exhaust
 // the machine's memory and get OOM-killed. History scans already cap at the
 // same limit (see triggerHistoryScan below).
-const maxConcurrentPRScans = 3
+const maxConcurrentPRScans = 2
 
 var prScanSem = make(chan struct{}, maxConcurrentPRScans)
 
@@ -134,7 +134,7 @@ func (h *Handler) triggerHistoryScan(installationID int64) {
 		log.Printf("list repos for install %d: %v", installationID, err)
 		return
 	}
-	const maxConcurrent = 3
+	const maxConcurrent = 2
 	sem := make(chan struct{}, maxConcurrent)
 	var wg sync.WaitGroup
 
